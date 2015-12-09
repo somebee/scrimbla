@@ -1,10 +1,11 @@
 import Highlighter from '../core/highlighter'
 import '../core/util' as util
 
+# dangerous to extend all htmlelement tags globally
 extend tag htmlelement
 
 	def bubble name, data
-		log "bubble event",name,data
+		# log "bubble event",name,data
 		var ev = Imba.Events.trigger(name,self,data: data, bubble: yes)
 		return ev
 
@@ -25,16 +26,13 @@ extend tag htmlelement
 
 		var curr = dom:nextSibling
 		if el isa String
-			if false and curr isa Text # only in webkit?
-				curr:textContent = el + curr:textContent
-				return curr
 			el = document.createTextNode(el)
 
 		if curr
 			parent.insertBefore(el, curr)
 		else
 			parent.appendChild(el)
-		# should trigger attached or something
+
 		return el
 
 	def prev= el
@@ -48,9 +46,6 @@ extend tag htmlelement
 
 		var curr = dom:prevSibling
 		if el isa String
-			if false and curr isa Text # only in webkit?
-				curr:textContent += curr:textContent el
-				return curr
 			el = document.createTextNode(el)
 		parent.insertBefore(el,self)
 		# parent.insert(el, before: self)
