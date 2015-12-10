@@ -1,5 +1,6 @@
 
-var imba = Imbac
+# var imbac = global.Imbac
+import Lexer from 'imba/src/compiler/lexer'
 
 var NODETYPE = 'b'
 var KEYWORDS = [
@@ -136,7 +137,7 @@ class Stack
 
 	def initialize
 		@stack = []
-		self
+		return self
 
 	def push val
 		@stack.push(val)
@@ -184,6 +185,15 @@ export class Highlighter
 
 	def self.logger
 		VIEW.logger
+
+	def self.tokenize code, o = {}
+		# console.log 'tokenize using local lexer'
+		if global.Imbac
+			return Imbac.tokenize(code,o)
+
+		@lexer ||= Lexer.new
+		@lexer.reset
+		@lexer.tokenize(code,o)
 
 	def self.reclassify domnode, type, token, newCode, oldCode
 
@@ -288,11 +298,10 @@ export class Highlighter
 		return root.@children
 	
 	def self.normalizeTokens code, tokens, offset = 0
-		var pos = 0
 		var idx = 0
 		var caret = 0
 		var new = []
-		var tok, next, prev,typ,val
+		var tok, next, typ,val
 		var loc = 0
 
 		var stack = Stack.new
@@ -360,25 +369,20 @@ export class Highlighter
 	def self.reparse o
 
 		if o isa Element
-			# logger.log 'is an element',o
 			let el = tag(o)
 			el?.mutated if el
 			return
 
-		var start = o:start
-		var end = o:end
 		var nodes = o:nodes
 		var code = o:code
 		var tokens = o:tokens
 		# should use a global logger-instance
 		logger.groupCollapsed('reparse %s',JSON.stringify(code))
 		# logger.log nodes.slice
-
-		# console.log 'reparsing',code
 		# big hack - adding a space at the end to close up selectors
 		# should rather drop inline and let the parser pair up loose ends?
 		unless tokens
-			tokens = Imbac.tokenize(code + ' ',inline: yes, silent: yes, rewrite: no)
+			tokens = self.tokenize(code + ' ',inline: yes, silent: yes, rewrite: no)
 			tokens = normalizeTokens(code,tokens)
 			logger.log tokens.slice
 
@@ -390,13 +394,11 @@ export class Highlighter
 	def self.applyTokens code, tokens, nodes, nested, parent
 		# what about len and loc for inner nodes? Should this be set already?
 
-		var node, nodeIndex
-		var token, tokenIndex
-		var prevNode, nextNode
+		var node
+		var prevNode
 
 		var addNode = do |nodes,index,after|
 			logger.log 'addNode',index
-			var rel = nodes[index]
 			var el = document.createElement(NODETYPE)
 
 			if after
@@ -447,10 +449,7 @@ export class Highlighter
 			# need to insert new node here - 
 			node = addNode(nodes,i,prevNode) if !node
 
-			# while nodeIndex < i
-			# 	var node = nodes[nodeIndex]
 			if tok.@type == 'STRING' and tok.@value.match(/\§{3}/)
-				# console.log 'found string that is just a placeholder'
 				if nested
 					nested.pop # this is the node
 					prevNode = node
@@ -461,7 +460,6 @@ export class Highlighter
 			var cval = code.substr(tloc,tok.@len)
 			var cprev = node:textContent
 			var element = reclassify(node,tok.@type,tok,cval,cprev)
-			# console.log 'cval is',JSON.stringify([cval,cprev],tok)
 
 			if tok.@children
 				let cnodes = node:children
@@ -478,12 +476,12 @@ export class Highlighter
 					node:innerHTML = ''
 					cnodes = []
 
-				let o =
-					code: cval
-					nodes: cnodes
-					tokens: tok.@children # already parsed
-					nested: nested
-					parent: node
+				# let o =
+				# 	code: cval
+				# 	nodes: cnodes
+				# 	tokens: tok.@children # already parsed
+				# 	nested: nested
+				# 	parent: node
 				
 				applyTokens(cval,tok.@children,cnodes,nested,node)
 
@@ -514,14 +512,12 @@ export class Highlighter
 		unless tokens
 			try
 				# sure we dont want to rewrite anything now?
-				console.time('tokenize')
+				console.time('tokenize') if DEBUG
 				if o:mode == 'full'
-					# console.log 'highlight everything',code
-					tokens = Imbac.tokenize(code,{})
+					tokens = self.tokenize(code,{})
 				else
-					tokens = Imbac.tokenize(code,{inline: yes, silent: yes, rewrite: no})
-				
-				console.timeEnd('tokenize')
+					tokens = self.tokenize(code,{inline: yes, silent: yes, rewrite: no})
+				console.timeEnd('tokenize') if DEBUG
 			catch e
 				tokens = e.@options:tokens if e.@options
 
@@ -544,7 +540,6 @@ export class Highlighter
 		@varRefs = {}
 
 		if o:mode == 'full' and !ast
-			# console.log('include ast for tokens!',code)
 			@ast = Imbac.parse(@tokens,{})
 
 		return self
@@ -581,7 +576,6 @@ export class Highlighter
 	def process
 		var o = options
 
-		
 		var str = @code
 		var pos = @tokens:length
 
@@ -590,13 +584,11 @@ export class Highlighter
 		var context = null
 
 		var push = do |ctx|
-			# console.log 'push to stack',ctx,depth,o:inner
 			stack.push(ctx)
 			depth = stack:length
 			context = stack[depth - 1]
 
 		var pop = do |ctx|
-			# console.log 'pop stack',ctx
 			stack.pop
 			depth = stack:length
 			context = stack[depth - 1]
@@ -657,7 +649,7 @@ export class Highlighter
 				cls = cls[1]
 
 			cls = cls.split(" ")
-			# console.log "adding token {tok.@type}"
+
 			if KEYWORDS.indexOf(typ) >= 0
 				cls.unshift('keyword')
 
@@ -674,7 +666,7 @@ export class Highlighter
 					cls.push('log')
 
 			if tok.@variable
-				# console.log "IS VARIABLEREF",tok.@value
+
 				cls.push('lvar')
 				let ref = self.varRef(tok.@variable)
 				cls.push("ref-"+ref)

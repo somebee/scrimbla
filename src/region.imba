@@ -31,7 +31,7 @@ export class Region
 		@b = b
 		@root = root
 		@view = view
-		self
+		return self
 
 	def start
 		Math.min(@a,@b)

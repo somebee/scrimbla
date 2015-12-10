@@ -2,8 +2,6 @@
 
 var KEYWORDS = 'var if elif else for while def in isa while until switch when then return class tag let do and or prop attr in prop'.split(' ')
 var OPS = '+ - * / = ++ -- == === != !== > < >= <= & && | || or . : ?'.split(' ')
-var OPEN = ['"',"'",'(','[','{','<']
-var CLOSE = ['"',"'",')',']','}','>']
 
 var WHITESPACE = /^[ \t\n]+$/
 
