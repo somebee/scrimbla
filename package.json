@@ -20,7 +20,7 @@
   },
   "scripts": {
   },
-  "files": [],
+  "files": ["src"],
   "directories": {},
   "main": "./index.js",
   "homepage": "http://imba.io",
