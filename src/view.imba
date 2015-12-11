@@ -81,7 +81,18 @@ tag imview
 		render
 		@observer  = Observer.new(self)
 		caret.region = Region.new(0,0,root,self)
+
+		# bind to mousemove of dom?
+
+		dom.addEventListener('mouseover') do |e| Imba.Events.delegate(e)
+		dom.addEventListener('mouseout') do |e| Imba.Events.delegate(e)
 		self
+
+	def onmouseover e
+		e.halt
+
+	def onmouseout e
+		e.halt
 
 	def input= input
 
@@ -98,10 +109,9 @@ tag imview
 	# to deal with mutations.
 	def tick
 		@frames++
-		# caret.render
 		history.tick
 		render
-		repair if @dirty # only if change has happened?
+		repair if @dirty
 		self
 
 	def commit
@@ -121,7 +131,15 @@ tag imview
 
 		hints.cleanup
 
-		delay('didchange',50) do Imba.Events.trigger('edited:async',self,data: self)
+		delay('didchange',50) do
+			Imba.Events.trigger('edited:async',self,data: self)
+
+		# we can improve how/when we choose to annotate.
+		# currently we do it after every edit - but it should
+		# really only be needed when we have changed identifiers.
+		# should also only reannotate the closest known scope,
+		# but this comes later with refactoring from whole files
+		# to scopes.
 		delay('annotate',500) do annotate
 		delay('recompile',-1) # cancel recompilation
 		self
@@ -141,7 +159,7 @@ tag imview
 		<imviewbody@body>
 			<imdims@dims> "x"
 			<imcaret@caret view=self>
-			<imroot@root.imba>
+			<imroot@root.imba view=self>
 
 	def header
 		null
@@ -258,7 +276,7 @@ tag imview
 		var alt = (/\balt\b/).test(combo)
 		var sup = (/\bsuper\b/).test(combo)
 
-		log 'imview keydown',combo
+		# log 'imview keydown',combo
 
 		if action
 			# console.log 'action here?!',action
@@ -311,7 +329,7 @@ tag imview
 			return e.halt
 
 		if combo.match(/^super\+(c|v|x)$/)
-			console.log 'matching combo for copy paste'
+			# console.log 'matching combo for copy paste'
 			e.halt
 			@awaitCombo = yes
 			refocus
@@ -378,20 +396,19 @@ tag imview
 			log 'error from ontype'
 
 	def onbackspace e
-		log 'onbackspace'
 		e.cancel.halt
 		caret.erase
 		return
 
 	def onbeforecopy e
-		console.log 'onbeforecopy',e
+		console.log('onbeforecopy',e) if DEBUG
 		input.select
 		var data = e.event:clipboardData
 		data.setData('text/plain', caret.text)
 		e.halt
 
 	def oncopy e
-		console.log 'oncopy',e,caret.text
+		console.log('oncopy',e,caret.text) if DEBUG
 		var data = e.event:clipboardData
 		data.setData('text/plain', caret.text)
 		e.halt.cancel
@@ -399,7 +416,8 @@ tag imview
 		return
 
 	def oncut e
-		console.log 'oncut',e
+		if DEBUG
+			console.log 'oncut',e
 		var data = e.event:clipboardData
 		data.setData('text/plain', caret.text)
 		e.halt.cancel
@@ -434,9 +452,12 @@ tag imview
 		return
 
 	def ontouchstart touch
+		@rect = @body.dom.getBoundingClientRect
+
 		return unless touch.button == 0
 
 		if touch.@touch
+			# is it not redirected?
 			return touch.redirect({})
 
 		var e = touch.event
@@ -444,7 +465,6 @@ tag imview
 		# see if shift is down? should change behaviour
 		var shift = e:shiftKey
 		# log 'ontouchstart',touch,touch.x,touch.y,e,touch.button
-		@rect = @body.dom.getBoundingClientRect
 		var [r,c] = rcForTouch(touch)
 
 		if shift
@@ -454,7 +474,7 @@ tag imview
 
 		caret.head.set(r,c).normalize
 		caret.dirty
-		console.log 'touch start refocus?'
+		# console.log 'touch start refocus?'
 		refocus
 		self
 
@@ -478,7 +498,6 @@ tag imview
 
 	def ontouchend touch
 		return unless touch.button == 0
-		log 'ontouchend'
 		var [r,c] = rcForTouch(touch)
 		caret.head.set(r,c).normalize
 		caret.dirty 
@@ -498,6 +517,8 @@ tag imview
 
 			elif spans[0] and spans[0]:mode == 'all'
 				console.log 'removing single node?!'
+				let before = spans[0]:node.prev
+
 				spans[0]:node.setPrev(<iminsert.dirty>)
 
 			for sel,i in spans
@@ -514,12 +535,14 @@ tag imview
 			hint.adjust(reg,yes)
 		# hints.cleanup
 		edited
+		repair if util.isWhitespace(str)
 		self
 
 	def erased reg
 		for hint in hints
 			hint.adjust(reg,no)
 		edited
+		repair # repair synchronously
 
 	def insert point, str, edit
 		if point isa Region
@@ -527,7 +550,7 @@ tag imview
 				logger.warn 'uncollapsed region in insert is not allowed'
 			point = point.start
 
-		console.log 'insert',point,str
+		log 'insert',point,str
 		# should maybe create this as a command - and then make it happen?
 
 		history.oninsert(point,str,edit)
@@ -541,17 +564,17 @@ tag imview
 		var reg
 
 		# log spans,mid,lft,rgt
-		console.log 'before and after',lft,rgt,str
+		log 'before and after',lft,rgt,str
 
 		if mid
-			console.log 'insert mid'
+			log 'insert mid',mid:node
 			mid:node.insert(mid:region,str,edit,mid)
 
 		else
 
 			while rgt
 				if rgt.canPrepend(str)
-					console.log 'prepend',rgt,str
+					log 'prepend',rgt,str
 					rgt.insert('prepend',str,edit)
 					return inserted(point,str)
 
@@ -564,7 +587,7 @@ tag imview
 			# find the closest parent
 			while lft
 				if lft.canAppend(str)
-					console.log 'append',lft,str
+					log 'append',lft,str
 					lft.insert('append',str,edit)
 					return inserted(point,str)
 
@@ -664,7 +687,7 @@ tag imview
 	
 
 	def annotate
-		console.log 'annotate'
+		# console.log 'annotate'
 
 		var state = root.codeState
 		var code = state:code
@@ -697,25 +720,36 @@ tag imview
 				map[node.@loc] = node
 
 			# get textNodes with mapping(!)
-			for variable in vars
-				for ref,i in variable:refs
+			for variable,i in vars
+				for ref,k in variable:refs
 					var a = ref:loc[0]
 					var b = ref:loc[1]
+					var eref = "v{i}"
 
 					if map[a]
-						map[a]:parentNode:classList.add('lvar')
+						let dom = map[a]:parentNode
+						let oldRef = dom.getAttribute('eref')
+						# console.log 'setting the ref for node?',dom,dom.@tag
+						tag(dom).eref = eref
+						# if dom.@tag
+						# 	dom.@tag.eref = eref
+						# else
+						# 	dom.setAttribute('eref',eref) unless oldRef == eref
+						# 	dom:classList.add('lvar')
 
 			return
 
 		try
-			console.time('annotate')
+			
 			console.time('analyze')
 			IM.worker.analyze(code, bare: yes) do |res|
 				console.log 'result from worker analyze'
 				console.timeEnd('analyze')
-				apply(res:data) if res:data
-			# var meta = Imbac.analyze(code, bare: yes)
-			console.timeEnd('annotate')
+
+				if res:data
+					console.time('annotate')
+					apply(res:data)
+					console.timeEnd('annotate')
 		catch e
 			log 'error from annotate',e
 
@@ -808,6 +842,9 @@ tag imview
 
 		console.timeEnd('nodeAtRegion')
 		return match ? tag(match:parentNode) : null
+
+	def nodesForEntity ref
+		%([eref="{ref}"])
 
 	# does not need to belong to view directly
 	def nodesInRegion region, includeEnds = yes, generalize = no
@@ -940,15 +977,6 @@ tag imview
 	def substr region, len
 		buffer.substr(region,len)
 
-		#		var buf = buffer
-		#		if region isa Region
-		#			buf.substr(region.start,region.size)
-		#
-		#		elif region isa Number
-		#			buf.substr(region,len or 1)
-		#		else
-		#			throw 'must be region or number'
-		#
 	# move into Buffer
 	def linestr nr
 		buffer.line(nr)

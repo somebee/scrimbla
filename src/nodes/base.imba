@@ -189,7 +189,7 @@ tag im < b
 		code:length
 
 	def view
-		VIEW
+		@view or (parent?.view) or VIEW
 		
 	def sel
 		view.caret

@@ -1,5 +1,9 @@
 import Region from '../region'
 
+
+export def isWhitespace str
+	(/^[\n\t\ ]+$/).test(str)
+
 export def commonAncestor a,b
 	if a isa Array
 		var arr = a.slice

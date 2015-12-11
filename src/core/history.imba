@@ -91,7 +91,7 @@ class Snapshot < Mark
 		[@code]
 
 	def redo view
-		console.log 'load',data
+		console.log 'load',@code
 		view.load @code
 		# must repair? what about annotations?
 		self
@@ -265,16 +265,19 @@ export class History
 		add mark
 
 	def tick
+		
 		if @mode == 'play'
+			# console.log 'plyaing'
 			var frame = view.frames - @offset
+			# console.log 'history.tick will play',frame,next,current
 			apply do
 				while next and next.frame <= frame
+					# console.log 'history.tick play',frame,next,current
 					# console.log 'replay frame!'
 					next.redo(view,self)
 					current = next
 
 			unless next
-				 # console.log 'reached the end',current
 				mode = 'live'
 		self
 
@@ -285,6 +288,7 @@ export class History
 			snap = snap.next
 
 		@offset = view.frames - snap.frame
+		console.log "playing from seed",snap,@offset
 		# console.log 'found snapshot?!? -- offset frame',@offset
 		apply do current = snap.redo(view,self)
 		mode = 'play'

@@ -104,16 +104,14 @@ IM.KeyBindings = [
 
 	combo ['super+z'] do |sel| sel.view.history.undo
 	combo ["super+shift+z"] do |sel| sel.view.history.redo
-	combo ["super+p"] do |sel| sel.view.history.play
+	combo ["alt+super+p"] do |sel| sel.view.history.play
+	# combo ["alt+shift+r"] do |sel| sel.view.history.play
 
 	combo ["super+s"], command: "save"
 	combo ["super+b"], command: "run"
 	combo ["alt+super+s"], command: "saveSession"
 	combo ["alt+shift+l"], command: "reparse"
 	combo ["alt+shift+k"], command: "reparseExtent"
-	combo ["super+r"], command: "record"
-
-	# combo ["super+l"], native: yes
 	
 	combo ["super+a"] do |sel| sel.selectAll
 	

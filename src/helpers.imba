@@ -42,6 +42,8 @@ extend class String
 		elif region isa Region
 			text.substr(0,region.start) + str + text.slice(region.end)
 
+export def isWhitespace str
+	WHITESPACE.test(str)
 
 def IM.num val
 	<imnum.number text=val>

@@ -18,7 +18,20 @@ var keywords = [
 tag imtok < im
 	alias 'token'
 
-	attr vref
+	attr eref watch: yes
+
+	def erefDidSet new, old
+		# experimental
+		# console.log 'erefDidSet',new,old
+		flag('lvar',!!new) unless new and old
+		self
+
+	def isVarRef
+		hasFlag('lvar')
+
+	def clearVarRef
+		eref = null
+		self
 
 	def clone val
 		IM.tok(val)
@@ -87,17 +100,22 @@ tag imtok < im
 		e.halt
 		select
 
+	def onmouseover e
+		e.halt
+
+		if eref
+			view.nodesForEntity(eref).map do |el| el.flag('hl')
+
+	def onmouseout e
+		e.halt
+		if eref
+			view.nodesForEntity(eref).map do |el| el.unflag('hl')
+
 
 tag imidentifier < imtok
 	type 'identifier'
 
 	attr name
-
-	def isVarRef
-		hasFlag('lvar')
-
-	def clearVarRef
-		unflag('lvar')
 
 	def validate code
 		# regex for identifier
@@ -115,7 +133,6 @@ tag imidentifier < imtok
 		if isVarRef
 			clearVarRef
 		super
-
 
 tag imtagtype < imtok
 	type 'tag_type'

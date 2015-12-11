@@ -19,13 +19,26 @@ tag iminsert < im
 		self.code = ins
 		self
 
+	def isWhitespace
+		code.match(/^[\n\t\ ]+$/)
+
 	def mutated
 		log 'iminsert mutated'
+
 		var dirty = dirtyExtent
 		view.highlighter.reparse(dirty)
 		self
 
 tag imwhitespace < im
+
+	def canPrepend str
+		validate( str + code )
+
+	def canAppend str
+		validate( code + str )
+
+	def validate
+		no
 
 tag imnewline < imwhitespace
 
@@ -34,7 +47,10 @@ tag imnewline < imwhitespace
 
 	def canPrepend str
 		if str.match(/^[\n\t\ ]+$/)
-			console.log 'can prepend to newline!!'
+			# should not really be able to prepend here
+			# it shold rather insert a new newline in
+			# an iminsert, and that should be able to
+			# decide that no reparse is needed
 			return yes
 		return no
 
@@ -74,6 +90,11 @@ tag imspace < imwhitespace
 
 	def validate val = code
 		(/^[ ]+$/).test(val)
+
+	# this should be the default for all nodes, no?
+	def mutated o = {}
+		return self if !o:deep and validate(code)
+		super
 
 tag imsemicolon < imwhitespace
 	type 'semicolon'

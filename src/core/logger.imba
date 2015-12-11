@@ -10,24 +10,23 @@ export class Logger
 		self
 
 	def log
-		# console.log('logging through logger')
-		console.log(*arguments) if @enabled
+		console.log(*arguments) if @enabled or DEBUG
 		self
 
 	def warn
-		console.log(*arguments) if @enabled
+		console.log(*arguments) if @enabled or DEBUG
 		self
 
 	def group name
-		console.group(*arguments) if @enabled
+		console.group(*arguments) if @enabled or DEBUG
 		self
 
 	def groupCollapsed
-		console.groupCollapsed(*arguments) if @enabled
+		console.groupCollapsed(*arguments) if @enabled or DEBUG
 		self
 
 	def groupEnd
-		console.groupEnd if @enabled
+		console.groupEnd if @enabled or DEBUG
 		self
 
 

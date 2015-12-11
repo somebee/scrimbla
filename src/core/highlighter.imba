@@ -2,6 +2,8 @@
 # var imbac = global.Imbac
 import Lexer from 'imba/src/compiler/lexer'
 
+import './util' as util
+
 var NODETYPE = 'b'
 var KEYWORDS = [
 	'null', 'this',
@@ -366,6 +368,28 @@ export class Highlighter
 		new = nestTokens(new)
 		return new
 
+	def self.whitespaceToTokens str
+		var tok
+		var tokens = []
+		var caret = 0
+		var len = str:length
+
+		while len > caret
+			var loc = caret
+			var chr = str[caret++]
+			if chr == '\t'
+				tokens.push(tok = Token.new('tab',chr,-1,loc,1))
+			elif chr == '\n'
+				tokens.push(tok = Token.new('newline',chr,-1,loc,1))
+			elif chr == ' '
+				if tok and tok.@type == 'whitespace'
+					tok.@value += ' '
+					tok.@len += 1
+					continue
+				tokens.push(tok = Token.new('whitespace',chr,-1,loc,1))
+
+		return tokens
+
 	def self.reparse o
 
 		if o isa Element
@@ -373,11 +397,15 @@ export class Highlighter
 			el?.mutated if el
 			return
 
-		var nodes = o:nodes
-		var code = o:code
+		var nodes  = o:nodes
+		var code   = o:code
 		var tokens = o:tokens
 		# should use a global logger-instance
 		logger.groupCollapsed('reparse %s',JSON.stringify(code))
+
+		if util.isWhitespace(code) and !tokens
+			console.log 'using whitespaceToTokens'
+			tokens = self.whitespaceToTokens(code)
 		# logger.log nodes.slice
 		# big hack - adding a space at the end to close up selectors
 		# should rather drop inline and let the parser pair up loose ends?
@@ -615,6 +643,7 @@ export class Highlighter
 			var val = tok.@value
 			var len = tok.@len # or tok.@value:length
 			var meta = tok.@meta
+			var attrs = ''
 
 			if loc > caret
 				var add = str.substring(caret,loc)
@@ -669,7 +698,8 @@ export class Highlighter
 
 				cls.push('lvar')
 				let ref = self.varRef(tok.@variable)
-				cls.push("ref-"+ref)
+				attrs += " eref='v{ref}'"
+				# cls.push("ref-"+ref)
 
 			if typ == 'herecomment'
 				let end = "<{NODETYPE}>###</{NODETYPE}>"
@@ -680,7 +710,7 @@ export class Highlighter
 
 			var clstr = cls.join(" ")
 			clstr = '_imtok ' + clstr unless clstr.match(/\b\_/)
-			res += "<{node} class='{clstr}'>" + content + "</{node}>"
+			res += "<{node} class='{clstr}'" + attrs + ">" + content + "</{node}>"
 
 		# close after?
 		if close

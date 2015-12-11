@@ -1,6 +1,8 @@
 
 tag imroot < imblock
 
+	prop view
+
 	@nodeType = 'code'
 	# def self.dom
 	#	@dom ||= document.createElement('code')
@@ -21,6 +23,8 @@ tag imroot < imblock
 
 	def build
 		super
+
+		dom.addEventListener('')
 		self
 
 	def commit
