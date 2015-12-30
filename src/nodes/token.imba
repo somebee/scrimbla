@@ -233,18 +233,24 @@ tag imstr < imtok
 			(/^\'([^'\{]*)\'$/).test(code)
 
 	trigger '"' do |token,o|
-		if token.quote == '"'
+		if o:mode == 'all'
+			token.quote = '"'
+			return true
+		elif token.quote == '"'
 			this.insert('\\"')
 			return true
-		elif token.quote == "'" and o:mode == 'all'
-			token.quote = '"'
-			this
+		else
+			this.insert('"')
+		
 
 	trigger "'" do |token,o|
-		if token.quote == '"'
+		if o:mode == 'all'
 			token.quote = "'"
-		elif token.quote == "'" and o:mode == 'all'
+		elif token.quote == "'"
 			this.insert("\\'")
+			return true
+		else
+			this.insert("'")
 
 
 
