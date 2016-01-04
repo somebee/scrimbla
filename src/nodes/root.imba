@@ -23,8 +23,7 @@ tag imroot < imblock
 
 	def build
 		super
-
-		dom.addEventListener('')
+		# dom.addEventListener('')
 		self
 
 	def commit

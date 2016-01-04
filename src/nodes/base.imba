@@ -360,10 +360,10 @@ tag im < b
 		while prev = start:previousSibling
 			if prev isa Text
 				break
-			elif prev.matches('._imnewline,._imtab') # ,._imopen,._imclose
+			elif tag(prev).matches('._imnewline,._imtab') # ,._imopen,._imclose
 				break
 			
-			if prev.matches('._imopen')
+			if tag(prev).matches('._imopen')
 				opener = prev
 			
 			start = prev
@@ -372,10 +372,10 @@ tag im < b
 		while next = end:nextSibling
 			if next isa Text
 				break
-			elif next.matches('._imnewline') # ._imopen,._imclose
+			elif tag(next).matches('._imnewline') # ._imopen,._imclose
 				break
 
-			if next.matches('._imclose')
+			if tag(next).matches('._imclose')
 				closer = next
 
 			end = next

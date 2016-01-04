@@ -466,6 +466,10 @@ tag imcaret
 			caret: reg.clone.collapse(no)
 		)
 
+	def chToLen v
+		# return v + 'ch'
+		(v * 0.6).toFixed(5) + 'em'
+
 	def dirty
 		@timestamp = Date.new
 		# var hash = toArray.join("")
@@ -500,16 +504,16 @@ tag imcaret
 
 		css transform: "translate(0px,{a.row * 100}%)"
 		# convert the row and column to a region (should go both ways)
-		@caret.css transform: "translate({hc}ch,{(head.row - row) * 100}%)"
-		@start.css marginLeft: "{ac}ch", width: "auto"
-		@end.css width: "{bc}ch"
+		@caret.css transform: "translate({chToLen(hc)},{(head.row - row) * 100}%)"
+		@start.css marginLeft: chToLen(ac), width: "auto"
+		@end.css width: chToLen(bc)
 
 		if isCollapsed
 			mode = 'collapsed'
 
 		elif lc == 0
 			mode = 'single'
-			@start.css width: (bc - ac) + "ch"
+			@start.css width: chToLen(bc - ac)
 		else
 			@mid.text = lc > 1 ? ('\n').repeat(lc - 1) : ''
 			mode = 'multi'
