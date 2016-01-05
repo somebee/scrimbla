@@ -50,7 +50,6 @@ class RowCol
 		var lloc = lineloc
 		# find the real offset in characters (not columns)
 
-
 		# if offset < 0
 		# 	# normalize?
 		# 	@col = Math.min(@col,llen)
@@ -151,6 +150,7 @@ class RowCol
 		self
 
 	def alter mode, dir
+		# console.log 'alter caret head', mode,dir,JSON.stringify(peekbehind)
 		var nodes = caret.view.nodesInRegion(loc, no)
 		var node = nodes[0]
 		var mid = node and node:node
@@ -200,6 +200,7 @@ class RowCol
 
 		else
 			if dir < 0 and lft?.matches('._imtab')
+				# console.log 'left is a tab',lft.region.start
 				# head.col = head.col - 4
 				# caret.view.log 'right is tab',lft.region
 				loc = lft.region.start

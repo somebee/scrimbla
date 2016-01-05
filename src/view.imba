@@ -795,6 +795,13 @@ tag imview
 		rng.setStart(rel.@dom or rel,0)
 		rng.setEnd(node.@dom or node,0)
 		var pre = rng.toString
+		# hack to fix range issue in IE
+		if pre[pre:length - 1] != '\n' and el:previousSibling and el:previousSibling:textContent == '\n'
+			pre += '\n'
+
+		pre = util.normalizeNewlines(pre)
+		# var offsetFromBody = rng.moveEnd('character', -1000000)
+		# console.log 'regionForNode pre',JSON.stringify(pre),pre:length,len,offsetFromBody
 		Region.new(pre:length,pre:length + len,rel,self)
 
 	# Should merge with nodesInRegion
