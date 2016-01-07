@@ -239,8 +239,6 @@ tag imview
 	def onfocusin e
 		VIEW = self # hack
 		flag('focus')
-		window.alert("focus {e.event:target:className}")
-		console.log 'focus',e
 		self
 
 	def onfocusout e
