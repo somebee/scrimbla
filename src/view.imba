@@ -67,7 +67,10 @@ tag imview
 	def build
 		# console.log 'build imview'
 		VIEW = self
-		tabindex = 0
+
+		# need better control of this
+		if Imba.CLIENT and window:innerWidth > 600
+			tabindex = 0
 
 		@readonly = no
 		@logger = Logger.new(self)
@@ -236,6 +239,7 @@ tag imview
 	def onfocusin e
 		VIEW = self # hack
 		flag('focus')
+		window.alert("focus {e.event:target:className}")
 		console.log 'focus',e
 		self
 
