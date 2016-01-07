@@ -122,6 +122,10 @@ tag imview
 		logger.log(*arguments)
 		self
 
+	def trigger event, data = self
+		Imba.Events.trigger(event,self,data: data)
+
+
 	def edited
 		@changes++
 		@dirty = yes
@@ -711,6 +715,7 @@ tag imview
 				warn:group = 'analysis'
 				hints.add(warn).activate
 
+			trigger(:annotate,meta)
 			return self if warnings:length
 
 			var nodes = IM.textNodes(root.dom,yes)
@@ -741,7 +746,6 @@ tag imview
 			return
 
 		try
-			
 			console.time('analyze')
 			IM.worker.analyze(code, bare: yes) do |res|
 				console.log 'result from worker analyze'
@@ -751,6 +755,9 @@ tag imview
 					console.time('annotate')
 					apply(res:data)
 					console.timeEnd('annotate')
+				else
+					yes
+				
 		catch e
 			log 'error from annotate',e
 
