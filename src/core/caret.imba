@@ -479,6 +479,7 @@ tag imcaret
 			# the realCol values could have changed though?
 			view.history.oncaret(@hash,toHash,self)
 			@hash = toHash
+			blink
 			# console.log 'caret has actually changed',@hash
 
 		var rev = isReversed
@@ -503,6 +504,7 @@ tag imcaret
 		
 		# log 'dirty',region,a.row,a.col,b.row,b.col,hc,tc,head,tail,rev
 
+		# should happen asynchronously - no?
 		css transform: "translate(0px,{a.row * 100}%)"
 		# convert the row and column to a region (should go both ways)
 		@caret.css transform: "translate({chToLen(hc)},{(head.row - row) * 100}%)"
@@ -520,13 +522,23 @@ tag imcaret
 			mode = 'multi'
 		self
 
-	def render
-		var elapsed = (Date.new - @timestamp)
-		var flip = Math.round(elapsed / 500) % 2
+	def blink
+		clearTimeout(@blinker)
+		@caret.unflag(:blink)
+		@blinker = setTimeout(&,500) do
+			@caret.flag(:blink)
+			# updating the timeout again
+			if view.hasFlag('focus')
+				@blinker = setTimeout(&,500) do blink
+		self
 
-		if flip != @flip
-			@caret.flag('blink',flip)
-			@flip = flip
+	def render
+		# var elapsed = (Date.new - @timestamp)
+		# var flip = Math.round(elapsed / 500) % 2
+
+		# if flip != @flip
+		# 	@caret.flag('blink',flip)
+		# 	@flip = flip
 
 		self
 

@@ -86,13 +86,14 @@ tag imview
 
 		dom.addEventListener('mouseover') do |e| Imba.Events.delegate(e)
 		dom.addEventListener('mouseout') do |e| Imba.Events.delegate(e)
+
 		self
 
 	def onmouseover e
-		e.halt
+		e.halt.silence
 
 	def onmouseout e
-		e.halt
+		e.halt.silence
 
 	def input= input
 
