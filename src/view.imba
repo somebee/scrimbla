@@ -67,7 +67,10 @@ tag imview
 	def build
 		# console.log 'build imview'
 		VIEW = self
-		tabindex = 0
+
+		# need better control of this
+		if Imba.CLIENT and window:innerWidth > 600
+			tabindex = 0
 
 		@readonly = no
 		@logger = Logger.new(self)
@@ -90,10 +93,10 @@ tag imview
 		self
 
 	def onmouseover e
-		e.halt
+		e.halt.silence
 
 	def onmouseout e
-		e.halt
+		e.halt.silence
 
 	def input= input
 
@@ -121,6 +124,10 @@ tag imview
 	def log
 		logger.log(*arguments)
 		self
+
+	def trigger event, data = self
+		Imba.Events.trigger(event,self,data: data)
+
 
 	def edited
 		@changes++
@@ -232,7 +239,6 @@ tag imview
 	def onfocusin e
 		VIEW = self # hack
 		flag('focus')
-		console.log 'focus',e
 		self
 
 	def onfocusout e
@@ -711,6 +717,7 @@ tag imview
 				warn:group = 'analysis'
 				hints.add(warn).activate
 
+			trigger(:annotate,meta)
 			return self if warnings:length
 
 			var nodes = IM.textNodes(root.dom,yes)
@@ -741,7 +748,6 @@ tag imview
 			return
 
 		try
-			
 			console.time('analyze')
 			IM.worker.analyze(code, bare: yes) do |res|
 				console.log 'result from worker analyze'
@@ -751,6 +757,9 @@ tag imview
 					console.time('annotate')
 					apply(res:data)
 					console.timeEnd('annotate')
+				else
+					yes
+				
 		catch e
 			log 'error from annotate',e
 
@@ -796,6 +805,13 @@ tag imview
 		rng.setStart(rel.@dom or rel,0)
 		rng.setEnd(node.@dom or node,0)
 		var pre = rng.toString
+		# hack to fix range issue in IE
+		if pre[pre:length - 1] != '\n' and el:previousSibling and el:previousSibling:textContent == '\n'
+			pre += '\n'
+
+		pre = util.normalizeNewlines(pre)
+		# var offsetFromBody = rng.moveEnd('character', -1000000)
+		# console.log 'regionForNode pre',JSON.stringify(pre),pre:length,len,offsetFromBody
 		Region.new(pre:length,pre:length + len,rel,self)
 
 	# Should merge with nodesInRegion

@@ -101,13 +101,13 @@ tag imtok < im
 		select
 
 	def onmouseover e
-		e.halt
+		e.halt.silence
 
 		if eref
 			view.nodesForEntity(eref).map do |el| el.flag('hl')
 
 	def onmouseout e
-		e.halt
+		e.halt.silence
 		if eref
 			view.nodesForEntity(eref).map do |el| el.unflag('hl')
 

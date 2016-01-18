@@ -50,7 +50,6 @@ class RowCol
 		var lloc = lineloc
 		# find the real offset in characters (not columns)
 
-
 		# if offset < 0
 		# 	# normalize?
 		# 	@col = Math.min(@col,llen)
@@ -151,6 +150,7 @@ class RowCol
 		self
 
 	def alter mode, dir
+		# console.log 'alter caret head', mode,dir,JSON.stringify(peekbehind)
 		var nodes = caret.view.nodesInRegion(loc, no)
 		var node = nodes[0]
 		var mid = node and node:node
@@ -200,6 +200,7 @@ class RowCol
 
 		else
 			if dir < 0 and lft?.matches('._imtab')
+				# console.log 'left is a tab',lft.region.start
 				# head.col = head.col - 4
 				# caret.view.log 'right is tab',lft.region
 				loc = lft.region.start
@@ -478,6 +479,7 @@ tag imcaret
 			# the realCol values could have changed though?
 			view.history.oncaret(@hash,toHash,self)
 			@hash = toHash
+			blink
 			# console.log 'caret has actually changed',@hash
 
 		var rev = isReversed
@@ -502,6 +504,7 @@ tag imcaret
 		
 		# log 'dirty',region,a.row,a.col,b.row,b.col,hc,tc,head,tail,rev
 
+		# should happen asynchronously - no?
 		css transform: "translate(0px,{a.row * 100}%)"
 		# convert the row and column to a region (should go both ways)
 		@caret.css transform: "translate({chToLen(hc)},{(head.row - row) * 100}%)"
@@ -519,13 +522,23 @@ tag imcaret
 			mode = 'multi'
 		self
 
-	def render
-		var elapsed = (Date.new - @timestamp)
-		var flip = Math.round(elapsed / 500) % 2
+	def blink
+		clearTimeout(@blinker)
+		@caret.unflag(:blink)
+		@blinker = setTimeout(&,500) do
+			@caret.flag(:blink)
+			# updating the timeout again
+			if view.hasFlag('focus')
+				@blinker = setTimeout(&,500) do blink
+		self
 
-		if flip != @flip
-			@caret.flag('blink',flip)
-			@flip = flip
+	def render
+		# var elapsed = (Date.new - @timestamp)
+		# var flip = Math.round(elapsed / 500) % 2
+
+		# if flip != @flip
+		# 	@caret.flag('blink',flip)
+		# 	@flip = flip
 
 		self
 

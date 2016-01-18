@@ -135,6 +135,11 @@ var hlo = {
 	tab: do |m| Array.new(m:length + 1).join("<b class='_imtab'>\t</b>")
 }
 
+def escapeCode code
+	code = code.replace(/\</g,"&lt;")
+	code = code.replace(/\>/g,"&gt;")
+	return code
+
 class Stack
 
 	def initialize
@@ -585,7 +590,7 @@ export class Highlighter
 		text = text.replace(/(\#)([^\n]*)/g) do |m,s,q|
 			if @options:render:comment
 				m = @options:render:comment('comment',m)
-			var nr = comments.push("<{NODETYPE} class='_im _imcomment'>{m}</{NODETYPE}>")
+			var nr = comments.push("<{NODETYPE} class='_im _imcomment'>{escapeCode(m)}</{NODETYPE}>")
 			"${nr - 1}$"
 
 		text = text.replace(/(\n|[ ]+|[\t]+)/g) do |m,l|
@@ -710,7 +715,7 @@ export class Highlighter
 
 			var clstr = cls.join(" ")
 			clstr = '_imtok ' + clstr unless clstr.match(/\b\_/)
-			res += "<{node} class='{clstr}'" + attrs + ">" + content + "</{node}>"
+			res += "<{node} class='{clstr}'" + attrs + ">" + escapeCode(content) + "</{node}>"
 
 		# close after?
 		if close

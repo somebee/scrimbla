@@ -34,6 +34,10 @@ export def wrapText text, open, close
 	text = text.replace(/\'/g,"\\'") if open == "'"
 	(open or '') + text + (close or '')
 
+export def normalizeNewlines str
+	if str.indexOf('\r\n') >= 0
+		return str.replace(/\r\n/g,'\n')
+	return str
 
 export def stringIsBalanced str
 	var opens = '[{("\''
