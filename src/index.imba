@@ -1,3 +1,5 @@
+Scrimbla = {}
+
 IMDEBUG = yes
 
 # wtf er alt dette?
@@ -36,6 +38,12 @@ import ImbacWorker from "./core/worker"
 
 def IM.worker
 	@worker ||= ImbacWorker.new
+
+def IM.captor
+	unless @captor
+		@captor = <imcaptor>
+		@captor.enable
+	return @captor
 
 export var util = require './core/util'
 # nodes

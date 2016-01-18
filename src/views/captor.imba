@@ -18,5 +18,8 @@ tag imcaptor < input
 			var event = Imba.Event.wrap(type: 'inputblur', target: dom, relatedTarget: e:relatedTarget)
 			event.process
 			# Imba.Events.trigger('inputblur',dom)
-
 		return self
+
+	def enable
+		document:body:appendChild(dom) unless parent
+		self

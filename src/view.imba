@@ -86,6 +86,7 @@ tag imview
 
 		dom.addEventListener('mouseover') do |e| Imba.Events.delegate(e)
 		dom.addEventListener('mouseout') do |e| Imba.Events.delegate(e)
+		input ||= IM.captor
 		self
 
 	def onmouseover e
