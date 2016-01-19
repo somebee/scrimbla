@@ -48,6 +48,8 @@ tag imview
 	prop caret
 	prop frames
 	prop readonly
+	prop plugins
+	prop worker
 
 	def highlighter
 		Highlighter
@@ -77,7 +79,8 @@ tag imview
 		@frames = 0
 		@changes = 0
 		
-		@hints    = Hints.new(self)
+		@plugins   = []
+		@hints     = Hints.new(self)
 		@buffer    = Buffer.new(self)
 		@history   = History.new(self)
 		@shortcuts = ShortcutManager.new(self)
@@ -89,6 +92,8 @@ tag imview
 
 		dom.addEventListener('mouseover') do |e| Imba.Events.delegate(e)
 		dom.addEventListener('mouseout') do |e| Imba.Events.delegate(e)
+
+		worker ||= IM.worker # imba specific
 		input ||= IM.captor
 		self
 
@@ -148,7 +153,7 @@ tag imview
 		# should also only reannotate the closest known scope,
 		# but this comes later with refactoring from whole files
 		# to scopes.
-		delay('annotate',500) do annotate
+		delay('annotate',100) do annotate
 		delay('recompile',-1) # cancel recompilation
 		self
 
@@ -551,6 +556,11 @@ tag imview
 		edited
 		repair # repair synchronously
 
+
+	# This is basically for inserting text at certain locations
+	# the complexity comes from the fact that we look at the actual
+	# nodes in the affected area to see if we can alter them without
+	# any rehighlighting.
 	def insert point, str, edit
 		if point isa Region
 			if point.size > 0
@@ -607,8 +617,10 @@ tag imview
 			node = <iminsert>
 
 			if lft
+				# use insertAfter instead
 				lft.next = node
 			elif rgt
+				# use insertBefore instead
 				rgt.prev = node
 			else
 				# must be empty
@@ -691,11 +703,7 @@ tag imview
 		delay('annotate',-1)
 		self
 
-	
-
 	def annotate
-		# console.log 'annotate'
-
 		var state = root.codeState
 		var code = state:code
 
@@ -737,25 +745,19 @@ tag imview
 					if map[a]
 						let dom = map[a]:parentNode
 						let oldRef = dom.getAttribute('eref')
-						# console.log 'setting the ref for node?',dom,dom.@tag
 						tag(dom).eref = eref
-						# if dom.@tag
-						# 	dom.@tag.eref = eref
-						# else
-						# 	dom.setAttribute('eref',eref) unless oldRef == eref
-						# 	dom:classList.add('lvar')
 
 			return
 
 		try
 			console.time('analyze')
-			IM.worker.analyze(code, bare: yes) do |res|
+			worker.analyze(code, bare: yes) do |res|
 				console.log 'result from worker analyze'
 				console.timeEnd('analyze')
 
-				if res:data
+				if res:meta
 					console.time('annotate')
-					apply(res:data)
+					apply(res:meta)
 					console.timeEnd('annotate')
 				else
 					yes
@@ -844,7 +846,6 @@ tag imview
 				# console.log 'found ending point',node,str,bdist
 				# range.setEnd(node,bdist)
 				break
-
 
 			pos += len
 

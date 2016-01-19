@@ -93,6 +93,8 @@ export class Hint
 		self
 
 	def adjust reg, ins = yes
+		return self unless region
+
 		if region.intersects(reg)
 			# deactivate
 			prune

@@ -200,7 +200,10 @@ export class Highlighter
 
 		@lexer ||= Lexer.new
 		@lexer.reset
-		@lexer.tokenize(code,o)
+		try
+			@lexer.tokenize(code,o)
+		catch e
+			console.log 'caught tokenize error',e
 
 	def self.reclassify domnode, type, token, newCode, oldCode
 

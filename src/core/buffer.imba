@@ -103,3 +103,5 @@ export class Buffer
 
 	def toString
 		@buffer or ''
+
+	# analysis should happen in the buffer, not in the view?
