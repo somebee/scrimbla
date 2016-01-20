@@ -220,6 +220,8 @@ class RowCol
 tag imcarethead
 
 # should move into Marker (like Atom)
+# should not be a tag itself -- or - we should move the logic
+# out into a Selection class instead
 tag imcaret
 
 	prop region

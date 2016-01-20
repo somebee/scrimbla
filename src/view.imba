@@ -107,7 +107,6 @@ tag imview
 
 		if input != @input
 			@input = input
-			# console.log 'set input!!!',@input
 			@input.dom:_responder = dom
 		self
 
@@ -153,7 +152,7 @@ tag imview
 		# should also only reannotate the closest known scope,
 		# but this comes later with refactoring from whole files
 		# to scopes.
-		delay('annotate',100) do annotate
+		delay('annotate',200) do annotate
 		delay('recompile',-1) # cancel recompilation
 		self
 
@@ -352,6 +351,7 @@ tag imview
 			caret.insert(ins)
 			return self
 
+		console.log 'got here without any action?'
 		self
 
 	def onkeypress e
@@ -537,18 +537,7 @@ tag imview
 				# buffer need to updated during this?
 				sel:node.erase(sel:region,sel:mode,edit)
 
-		# delay('annotate',500) do annotate
 		return erased(reg)
-
-	def inserted loc, str
-		console.log 'inserted',loc,str
-		var reg = Region.new(loc,loc + str:length,null,self)
-		for hint in hints
-			hint.adjust(reg,yes)
-		# hints.cleanup
-		edited
-		repair if util.isWhitespace(str)
-		self
 
 	def erased reg
 		for hint in hints
@@ -562,14 +551,16 @@ tag imview
 	# nodes in the affected area to see if we can alter them without
 	# any rehighlighting.
 	def insert point, str, edit
+		console.log 'view.insert',str
 		if point isa Region
 			if point.size > 0
 				logger.warn 'uncollapsed region in insert is not allowed'
 			point = point.start
 
-		log 'insert',point,str
+		# console.log 'insert',point,str
 		# should maybe create this as a command - and then make it happen?
 
+		# this is where plugins should join in
 		history.oninsert(point,str,edit)
 
 		# log 'insert in view'
@@ -581,7 +572,7 @@ tag imview
 		var reg
 
 		# log spans,mid,lft,rgt
-		log 'before and after',lft,rgt,str
+		# log 'before and after',lft,rgt,str
 
 		if mid
 			log 'insert mid',mid:node
@@ -629,6 +620,31 @@ tag imview
 			node.insert('append',str,edit)
 
 		return inserted(point,str)
+
+	def inserted loc, str
+		console.log 'inserted',loc,str
+		var reg = Region.new(loc,loc + str:length,null,self)
+		for hint in hints
+			hint.adjust(reg,yes)
+		# hints.cleanup
+		edited
+		repair if util.isWhitespace(str)
+		self
+
+	def replace region, str
+		# console.log 'view.replace',region,str
+		history.mark('action')
+		self.erase(region)
+		# console.log 'view.replace erased',region,str,region.start
+		self.insert(region.start,str)
+		# console.log 'view.replace inserted'
+		self
+
+	def batch &cb
+		@batching = yes
+		cb and cb()
+		@batching = no
+		self
 
 	def onmutations
 		self
@@ -745,8 +761,10 @@ tag imview
 					if map[a]
 						let dom = map[a]:parentNode
 						let oldRef = dom.getAttribute('eref')
-						tag(dom).eref = eref
-
+						let el = tag(dom)
+						if el and el:setEref
+							el.eref = eref
+						# tag(dom).eref = eref
 			return
 
 		try

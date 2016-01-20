@@ -206,7 +206,9 @@ tag imstr < imtok
 		code[0]
 
 	def quote= quote
-		code = quote + code.slice(1,-1) + quote
+		var result = quote + code.slice(1,-1) + quote
+		view.replace(region,result)
+		# code = quote + code.slice(1,-1) + quote
 		self
 
 	def setup tok, new, old

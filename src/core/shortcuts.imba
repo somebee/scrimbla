@@ -1,5 +1,10 @@
 import './util' as util
 
+# move to class
+export class Shortcut
+	
+	prop combos
+
 var specialKeys = {
 	8: "backspace"
 	9: "tab"
@@ -276,6 +281,13 @@ global class ShortcutManager
 	def view
 		@view
 
+	def register keys, o
+		keys = [keys] if keys isa String
+		o = {command: o} if o isa Function
+		o:keys = keys
+		@bindings.push(o)
+		return self
+
 	def keysForEvent e
 		var combo = []
 		var special = specialKeys[e:which]
@@ -300,6 +312,7 @@ global class ShortcutManager
 
 		for cmd in @bindings
 			if cmd:keys.indexOf(combo) >= 0
+				# will match on parts now?!
 				var o = {}
 				# console.log 'found shortcut',combo,cmd:keys
 				if !cmd:context or cmd:context.call(view,view.caret,o,e,view)

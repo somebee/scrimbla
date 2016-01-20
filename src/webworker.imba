@@ -1,12 +1,9 @@
-extern postMessage, hljs
+extern postMessage
 
 var compiler = require 'imba/src/compiler/compiler'
 
 import ImbaParseError from 'imba/src/compiler/errors'
 var api = {}
-
-importScripts('/highlight.pack.js')
-hljs.configure classPrefix: ''
 
 def normalizeError e, o
 	unless e isa ImbaParseError
@@ -27,11 +24,7 @@ def normalizeError e, o
 def api.compile code, o = {}
 	try
 		var res = compiler.compile(code,o)
-		# console.log "returned from compiler"
 		var ret = {sourcemap: res:sourcemap, js: {body: res.toString}}
-		if o:highlight
-			console.log 'highlighting'
-			ret:js:html = hljs.highlightAuto(res.toString)[:value]
 		return ret
 	catch e
 		return {error: normalizeError(e,o)}
