@@ -252,7 +252,7 @@ export class History
 
 	def oncaret old, new
 		return self if @active
-		add Selection.new([old,new])
+		add Selection.new([old or new,new])
 
 	def onload code
 		return self if @active
