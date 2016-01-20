@@ -29,4 +29,12 @@ export class Logger
 		console.groupEnd if @enabled or DEBUG
 		self
 
+	def time name
+		console.time(name) if @enabled or DEBUG
+		self
+
+	def timeEnd name
+		console.timeEnd(name) if @enabled or DEBUG
+		self
+
 

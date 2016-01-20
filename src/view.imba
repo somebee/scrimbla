@@ -67,7 +67,6 @@ tag imview
 		4
 
 	def build
-		# console.log 'build imview'
 		VIEW = self
 
 		# need better control of this
@@ -206,8 +205,7 @@ tag imview
 
 	def load code, o = {}
 		filename = o:filename
-		# console.log 'loading file with filename',o:filename
-		# observer.pause do
+
 		if o:html
 			root.dom:innerHTML = o:html
 			@buffer.refresh
@@ -233,7 +231,6 @@ tag imview
 		self
 
 	def oninputfocus e
-		console.log 'oninputfocus!!'
 		VIEW = self # hack
 		flag('focus')
 
@@ -247,13 +244,9 @@ tag imview
 
 	def onfocusout e
 		unflag('focus')
-		console.log 'unfocus',e
 		self
 
 	def oninput e
-		self
-
-	def ontextinput e
 		self
 
 	def execAction action, keydown
@@ -351,7 +344,6 @@ tag imview
 			caret.insert(ins)
 			return self
 
-		console.log 'got here without any action?'
 		self
 
 	def onkeypress e
@@ -413,14 +405,14 @@ tag imview
 		return
 
 	def onbeforecopy e
-		console.log('onbeforecopy',e) if DEBUG
+		log('onbeforecopy',e)
 		input.select
 		var data = e.event:clipboardData
 		data.setData('text/plain', caret.text)
 		e.halt
 
 	def oncopy e
-		console.log('oncopy',e,caret.text) if DEBUG
+		log('oncopy',e,caret.text)
 		var data = e.event:clipboardData
 		data.setData('text/plain', caret.text)
 		e.halt.cancel
@@ -428,29 +420,25 @@ tag imview
 		return
 
 	def oncut e
-		if DEBUG
-			console.log 'oncut',e
+		log 'oncut',e
 		var data = e.event:clipboardData
 		data.setData('text/plain', caret.text)
 		e.halt.cancel
 		caret.erase
 
 	def onbeforepaste e
-		console.log 'onbeforepaste',e
+		log 'onbeforepaste',e
 
 	def onpaste e
-		console.log 'onpaste',e
+		loglog 'onpaste',e
 		var data = e.event:clipboardData
 		var text = data.getData('text/plain')
 		e.halt.cancel
 		caret.insert(text)
 		refocus
 		repair
-		# edit text: data
 
 	def refresh
-		# focusNode = sel.node # only if it is inside the scope?
-		# caret.region = sel.region
 		caret.render
 		self
 
@@ -528,9 +516,7 @@ tag imview
 				spans[1]:node.setPrev(<iminsert.dirty>)
 
 			elif spans[0] and spans[0]:mode == 'all'
-				console.log 'removing single node?!'
 				let before = spans[0]:node.prev
-
 				spans[0]:node.setPrev(<iminsert.dirty>)
 
 			for sel,i in spans
@@ -551,7 +537,7 @@ tag imview
 	# nodes in the affected area to see if we can alter them without
 	# any rehighlighting.
 	def insert point, str, edit
-		console.log 'view.insert',str
+		log 'view.insert',str
 		if point isa Region
 			if point.size > 0
 				logger.warn 'uncollapsed region in insert is not allowed'
@@ -622,7 +608,7 @@ tag imview
 		return inserted(point,str)
 
 	def inserted loc, str
-		console.log 'inserted',loc,str
+		log 'inserted',loc,str
 		var reg = Region.new(loc,loc + str:length,null,self)
 		for hint in hints
 			hint.adjust(reg,yes)
@@ -686,7 +672,7 @@ tag imview
 
 	def recompile
 		# should happen in a separate thread - and be delayed
-		console.log 'recompile'
+		log 'recompile'
 		var res
 
 		try
@@ -710,7 +696,7 @@ tag imview
 
 	def addError msg, loc
 		var reg = Region.normalize(loc,self)
-		console.log 'found warnings',reg,msg,loc
+		log 'found warnings',reg,msg,loc
 		if var node = nodeAtRegion(reg)
 			log 'node at region is?!',node
 			msg = msg.split(/error at (\[[\d\:]*\])\:\s*/).pop
@@ -836,7 +822,7 @@ tag imview
 
 	# Should merge with nodesInRegion
 	def nodeAtRegion region, exact = no
-		console.time('nodeAtRegion')
+		logger.time('nodeAtRegion')
 		var rel = root
 		var a = region.a
 		var b = region.b
@@ -876,7 +862,7 @@ tag imview
 				return el if region.equals(elreg)
 				el = el.parent
 
-		console.timeEnd('nodeAtRegion')
+		logger.timeEnd('nodeAtRegion')
 		return match ? tag(match:parentNode) : null
 
 	def nodesForEntity ref
@@ -884,7 +870,7 @@ tag imview
 
 	# does not need to belong to view directly
 	def nodesInRegion region, includeEnds = yes, generalize = no
-		console.time('nodesInRegion')
+		logger.time('nodesInRegion')
 		region = Region.normalize(region,self).normalize
 		var a = region.start
 		var b = region.end
@@ -1000,7 +986,7 @@ tag imview
 					# console.log 'slice away the items'
 				i++
 
-		console.timeEnd('nodesInRegion')
+		logger.timeEnd('nodesInRegion')
 		return matches
 
 	# should move to Buffer class
