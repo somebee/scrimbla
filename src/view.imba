@@ -430,7 +430,7 @@ tag imview
 		log 'onbeforepaste',e
 
 	def onpaste e
-		loglog 'onpaste',e
+		log 'onpaste',e
 		var data = e.event:clipboardData
 		var text = data.getData('text/plain')
 		e.halt.cancel
