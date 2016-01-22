@@ -1,5 +1,6 @@
 import './util' as util
 import Region from '../region'
+import Command from './command'
 
 class RowCol
 
@@ -427,7 +428,10 @@ tag imcaret
 		edit ||= {size: text:length}
 
 		head.normalize
-		var res = view.insert(region.start, text, edit)
+
+		view.runCommand 'Insert', region.start, text # Command.load('Insert',region.start,text)
+
+		# var res = view.insert(region.start, text, edit)
 		view.log 'inserted -- now move',edit:size
 
 		if sel

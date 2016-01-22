@@ -17,7 +17,9 @@ import Region from './region'
 import Hints,Hint from './core/hints'
 import Highlighter from './core/highlighter'
 import ListenerManager, Listener from './core/listener'
+import Command,TextCommand from './core/command'
 
+GCOMMAND = Command
 import './core/util' as util
 
 require './core/caret'
@@ -509,6 +511,7 @@ tag imview
 
 		var text = reg.text
 		history.onerase(reg,text,edit)
+		listeners.emit('Modified', ['Erase',reg,text])
 
 		var spans = nodesInRegion(reg,no,yes)
 		# gropu the nodes
@@ -532,12 +535,28 @@ tag imview
 		edited
 		repair # repair synchronously
 
+	# this delegates to insert etc?
+	def runCommand cmd
+		if cmd isa String
+			# console.log 'runCommand as string',arguments
+			cmd = Command.load(*arguments)
+			# console.log 'command is',cmd
+
+		if cmd isa TextCommand
+			var tcm = listeners.emit('TextCommand',cmd)
+			cmd.run(self)
+
+		# if cmd isa Command.Insert
+		# 	console.log 'executing InsertCommand'
+		# 	cmd.run(self)
+		self
 
 	# This is basically for inserting text at certain locations
 	# the complexity comes from the fact that we look at the actual
 	# nodes in the affected area to see if we can alter them without
 	# any rehighlighting.
 	def insert point, str, edit
+		# if this is called without an actual command, how 
 		log 'view.insert',str
 		if point isa Region
 			if point.size > 0
@@ -549,8 +568,9 @@ tag imview
 
 		# this is where plugins should join in
 		history.oninsert(point,str,edit)
+		listeners.emit('Modified', ['Insert',point,str])
 		# create command-objects for these?
-		var tcm = listeners.emit('TextCommand',['insert',point,str])
+		# var tcm = listeners.emit('TextCommand',['insert',point,str])
 
 		# log 'insert in view'
 		var spans = nodesInRegion(Region.normalize(point,self),no)

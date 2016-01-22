@@ -2,10 +2,18 @@ import List from './list'
 
 export class ListenerManager < List
 	
+	prop view
+
 	def initialize view
 		@view = view
 		@array = []
 		self
+
+	def will-add item
+		item.@view = view
+
+	def did-add item
+		item?.attached(@view)
 
 	def emit event, params
 		console.log 'emit event for ListenerManager'
@@ -15,8 +23,25 @@ export class ListenerManager < List
 		return ret
 
 export class Listener
+	
+	prop view
+	prop disabled
+
+	def attached view
+		self
+
+
+	def disable
+		disabled = yes
+		self
+
+	def enable
+		disabled = no
+		self
 
 	def on-event event,params
+		return if disabled
+
 		let fn = self["on{event}"]
 		if fn
 			return fn.call(self,params)

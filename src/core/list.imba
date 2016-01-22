@@ -5,7 +5,10 @@ export class List
 		self
 
 	def add item
-		@array.push(item) unless @array.indexOf(item) >= 0
+		unless @array.indexOf(item) >= 0
+			will-add(item)
+			@array.push(item)
+			did-add(item)
 		return self
 
 	def remove item
@@ -31,14 +34,10 @@ export class List
 		did-clear
 		self
 
-	def will-remove item
-		self
 
-	def did-remove item
-		self
-
-	def will-clear
-		self
-
-	def did-clear
-		self
+	def will-add item do self
+	def did-add item do self
+	def will-remove item do self
+	def did-remove item do self
+	def will-clear do self
+	def did-clear do self
