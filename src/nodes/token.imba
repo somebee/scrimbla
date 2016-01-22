@@ -100,16 +100,17 @@ tag imtok < im
 		e.halt
 		select
 
-	def onmouseover e
-		e.halt.silence
+	# centralize highlight of variables/entities
+	# def onmouseover e
+	# 	e.halt.silence
+	# 	
+	# 	if eref
+	# 		view.nodesForEntity(eref).map do |el| el.flag('hl')
 
-		if eref
-			view.nodesForEntity(eref).map do |el| el.flag('hl')
-
-	def onmouseout e
-		e.halt.silence
-		if eref
-			view.nodesForEntity(eref).map do |el| el.unflag('hl')
+	# def onmouseout e
+	# 	e.halt.silence
+	# 	if eref
+	# 		view.nodesForEntity(eref).map do |el| el.unflag('hl')
 
 
 tag imidentifier < imtok
