@@ -51,7 +51,6 @@ tag imview
 	prop caret
 	prop frames
 	prop readonly
-	prop plugins
 	prop listeners
 	prop worker
 
@@ -81,8 +80,7 @@ tag imview
 		@logger = Logger.new(self)
 		@frames = 0
 		@changes = 0
-		
-		@plugins   = []
+
 		@listeners = ListenerManager.new(self)
 		@hints     = Hints.new(self)
 		@buffer    = Buffer.new(self)
@@ -147,6 +145,7 @@ tag imview
 		hints.cleanup
 
 		delay('didchange',50) do
+			# really though?
 			Imba.Events.trigger('edited:async',self,data: self)
 
 		# we can improve how/when we choose to annotate.
@@ -155,8 +154,9 @@ tag imview
 		# should also only reannotate the closest known scope,
 		# but this comes later with refactoring from whole files
 		# to scopes.
-		delay('annotate',200) do annotate
-		delay('recompile',-1) # cancel recompilation
+		delay('annotate',200) do
+			annotate
+		# delay('recompile',-1) # cancel recompilation
 		self
 
 	def dirty
@@ -538,17 +538,12 @@ tag imview
 	# this delegates to insert etc?
 	def runCommand cmd
 		if cmd isa String
-			# console.log 'runCommand as string',arguments
 			cmd = Command.load(*arguments)
-			# console.log 'command is',cmd
 
 		if cmd isa TextCommand
 			var tcm = listeners.emit('TextCommand',cmd)
 			cmd.run(self)
 
-		# if cmd isa Command.Insert
-		# 	console.log 'executing InsertCommand'
-		# 	cmd.run(self)
 		self
 
 	# This is basically for inserting text at certain locations
@@ -566,7 +561,6 @@ tag imview
 		# console.log 'insert',point,str
 		# should maybe create this as a command - and then make it happen?
 
-		# this is where plugins should join in
 		history.oninsert(point,str,edit)
 		listeners.emit('Modified', ['Insert',point,str])
 		# create command-objects for these?
@@ -635,18 +629,15 @@ tag imview
 		var reg = Region.new(loc,loc + str:length,null,self)
 		for hint in hints
 			hint.adjust(reg,yes)
-		# hints.cleanup
+
 		edited
 		repair if util.isWhitespace(str)
 		self
 
 	def replace region, str
-		# console.log 'view.replace',region,str
 		history.mark('action')
 		self.erase(region)
-		# console.log 'view.replace erased',region,str,region.start
 		self.insert(region.start,str)
-		# console.log 'view.replace inserted'
 		self
 
 	def batch &cb
@@ -659,6 +650,7 @@ tag imview
 		self
 
 	def repair
+		console.log 'repair'
 		@dirty = no
 		var els = dom.getElementsByClassName('dirty')
 
@@ -690,19 +682,6 @@ tag imview
 
 		for n,i in path
 			n.flag('focus_')
-		self
-
-
-	def recompile
-		# should happen in a separate thread - and be delayed
-		log 'recompile'
-		var res
-
-		try
-			res = Imbac.compile(code, bare: yes)
-
-		if res
-			compiled(res)
 		self
 
 	def reparse

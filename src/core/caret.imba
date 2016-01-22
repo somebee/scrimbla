@@ -483,8 +483,14 @@ tag imcaret
 
 		if @hash != toHash
 			# the realCol values could have changed though?
-			view.history.oncaret(@hash,toHash,self)
-			@hash = toHash
+			let old = @hash
+			let new = toHash
+			view.history.oncaret(old,new,self)
+			@hash = new
+			# are we so sure?
+			# again - this should rather happen with a primitive
+			# selection type on the buffer or view
+			view.listeners.emit('SelectionModified',toArray)
 			blink
 			# console.log 'caret has actually changed',@hash
 
