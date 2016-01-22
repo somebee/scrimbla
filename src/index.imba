@@ -23,6 +23,7 @@ var SourceMap = require 'source-map'
 # if global:require
 import Region from "./region"
 
+
 require './helpers'
 
 require './core/history'
@@ -35,6 +36,7 @@ require "./editor"
 
 import Highlighter from "./core/highlighter"
 import ImbacWorker from "./core/worker"
+import Listener from "./core/listener"
 
 def IM.worker
 	@worker ||= ImbacWorker.new
@@ -49,10 +51,10 @@ export var util = require './core/util'
 # nodes
 require "./nodes/index"
 
-
 export def worker
 	IM.worker
 
 export SourceMap
 export Region
 export Highlighter
+export Listener

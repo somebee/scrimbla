@@ -16,6 +16,7 @@ import Observer from './core/observer'
 import Region from './region'
 import Hints,Hint from './core/hints'
 import Highlighter from './core/highlighter'
+import ListenerManager, Listener from './core/listener'
 
 import './core/util' as util
 
@@ -49,6 +50,7 @@ tag imview
 	prop frames
 	prop readonly
 	prop plugins
+	prop listeners
 	prop worker
 
 	def highlighter
@@ -79,6 +81,7 @@ tag imview
 		@changes = 0
 		
 		@plugins   = []
+		@listeners = ListenerManager.new(self)
 		@hints     = Hints.new(self)
 		@buffer    = Buffer.new(self)
 		@history   = History.new(self)
@@ -130,7 +133,6 @@ tag imview
 
 	def trigger event, data = self
 		Imba.Events.trigger(event,self,data: data)
-
 
 	def edited
 		@changes++
@@ -265,7 +267,6 @@ tag imview
 
 		if cmd:command isa Function
 			return cmd:command.apply(target or self,params)
-
 
 
 	def onkeydown e
@@ -548,6 +549,8 @@ tag imview
 
 		# this is where plugins should join in
 		history.oninsert(point,str,edit)
+		# create command-objects for these?
+		var tcm = listeners.emit('TextCommand',['insert',point,str])
 
 		# log 'insert in view'
 		var spans = nodesInRegion(Region.normalize(point,self),no)
