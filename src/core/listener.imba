@@ -16,7 +16,7 @@ export class ListenerManager < List
 		item?.attached(@view)
 
 	def emit event, params
-		console.log 'emit event for ListenerManager'
+		console.log 'emit event for ListenerManager',event,params
 		let ret
 		map do |item|
 			ret = item.on-event(event,params)

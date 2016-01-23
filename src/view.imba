@@ -650,7 +650,7 @@ tag imview
 		self
 
 	def repair
-		console.log 'repair'
+		# console.log 'repair'
 		@dirty = no
 		var els = dom.getElementsByClassName('dirty')
 

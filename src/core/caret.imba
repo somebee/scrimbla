@@ -247,10 +247,12 @@ tag imcaret
 		self
 
 	def toArray
-		if isCollapsed
-			return [head.row,head.col]
+		var hr = head.row, hc = head.col
+		var tr = tail.row, tc = tail.col
+		if isCollapsed or (tr == hr and tc == hc)
+			return [hr,hc]
 		else
-			return [head.row,head.col,tail.row,tail.col]
+			return [hr,hc,tr,tc]
 
 	def toHash
 		'[' + toArray.join(',') + ']'
