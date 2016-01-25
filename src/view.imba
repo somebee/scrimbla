@@ -164,10 +164,12 @@ tag imview
 
 	def activate
 		flag(:active)
+		caret.activate
 		self
 
 	def deactivate
 		unflag(:active)
+		caret.deactivate
 		self
 
 	def body
@@ -504,6 +506,7 @@ tag imview
 		var [r,c] = rcForTouch(touch)
 		caret.head.set(r,c).normalize
 		caret.dirty 
+		caret.blink # only if editor is active?
 		self
 
 	def erase reg, edit
@@ -1019,5 +1022,13 @@ tag imview
 		
 		Region.new(pos,end,self)
 	
+	def serialize
+		{
+			body: buffer.toString
+			caret: caret.toArray
+		}
+
+	def toJSON
+		serialize
 
 VIEW = null

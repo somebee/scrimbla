@@ -273,6 +273,9 @@ IM.Triggers = [
 
 global class ShortcutManager
 	
+	def self.instance
+		@instance ||= self.new
+
 	def initialize view, bindings
 		@view = view
 		@bindings = bindings or IM.KeyBindings

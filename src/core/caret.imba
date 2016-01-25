@@ -546,6 +546,15 @@ tag imcaret
 				@blinker = setTimeout(&,500) do blink
 		self
 
+	def activate
+		blink
+		self
+
+	def deactivate
+		clearTimeout(@blinker)
+		@caret.flag(:blink)
+		self
+
 	def render
 		# var elapsed = (Date.new - @timestamp)
 		# var flip = Math.round(elapsed / 500) % 2
