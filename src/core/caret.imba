@@ -541,9 +541,10 @@ tag imcaret
 		@caret.unflag(:blink)
 		@blinker = setTimeout(&,500) do
 			@caret.flag(:blink)
+			@blinker = setTimeout(&,500) do blink
 			# updating the timeout again
-			if view.hasFlag('focus')
-				@blinker = setTimeout(&,500) do blink
+			# if view.hasFlag('focus')
+			
 		self
 
 	def activate

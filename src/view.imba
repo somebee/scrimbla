@@ -163,6 +163,8 @@ tag imview
 		self
 
 	def activate
+		VIEW = self
+		@input.dom:_responder = dom
 		flag(:active)
 		caret.activate
 		self
@@ -277,6 +279,8 @@ tag imview
 		VIEW = self # hack
 		e.halt
 		# var combo = e.keycombo
+		console.log 'scrimbla onkeydown',e
+
 		var combo = shortcuts.keysForEvent(e.event)
 		var action = shortcuts.getShortcut(e)
 		var ins = null
@@ -357,7 +361,9 @@ tag imview
 			return e.halt
 
 		e.halt
+
 		var text = String.fromCharCode(e.event:charCode)
+		console.log 'keypress',text
 		e.@text = text
 		e.cancel
 		ontype(e)
@@ -366,6 +372,7 @@ tag imview
 	def ontextinput e
 		e.halt.cancel
 		e.@text = e.event:data
+		console.log 'textinput',e.@text
 		ontype(e)
 		self
 
@@ -1025,8 +1032,20 @@ tag imview
 	def serialize
 		{
 			body: buffer.toString
+			html: root.dom:innerHTML
 			caret: caret.toArray
+			changes: @changes
 		}
+
+	def deserialize o
+		unless buffer.toString == o:body
+			console.log 'deserialize now'
+			load(o:body,o)
+
+		if o:caret
+			caret.set o:caret
+			caret.dirty
+		self
 
 	def toJSON
 		serialize
