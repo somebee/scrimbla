@@ -278,8 +278,6 @@ tag imview
 	def onkeydown e
 		VIEW = self # hack
 		e.halt
-		# var combo = e.keycombo
-		console.log 'scrimbla onkeydown',e
 
 		var combo = shortcuts.keysForEvent(e.event)
 		var action = shortcuts.getShortcut(e)
