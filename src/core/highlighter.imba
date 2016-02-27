@@ -410,6 +410,8 @@ export class Highlighter
 		var tokens = o:tokens
 		# should use a global logger-instance
 		logger.groupCollapsed('reparse %s',JSON.stringify(code))
+		logger.time('reparsing')
+		CODE_REPARSE = code
 
 		if util.isWhitespace(code) and !tokens
 			console.log 'using whitespaceToTokens'
@@ -418,12 +420,13 @@ export class Highlighter
 		# big hack - adding a space at the end to close up selectors
 		# should rather drop inline and let the parser pair up loose ends?
 		unless tokens
-			tokens = self.tokenize(code + ' ',inline: yes, silent: yes, rewrite: no)
+			tokens = self.tokenize(code,inline: no, silent: yes, rewrite: no)
 			tokens = normalizeTokens(code,tokens)
 			logger.log tokens.slice
 
 		logger.log nodes.slice
 		applyTokens(code,tokens,nodes,o:nested,o:parent)
+		logger.timeEnd('reparsing')
 		logger.groupEnd
 		return
 

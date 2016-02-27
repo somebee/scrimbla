@@ -6,11 +6,11 @@ import ImbaParseError from 'imba/src/compiler/errors'
 var api = {}
 
 def normalizeError e, o
-	unless e isa ImbaParseError
-		if e:lexer
-			e = ImbaParseError.new(e, tokens: e:lexer:tokens, pos: e:lexer:pos)
-		else
-			e = {message: e:message}
+	if e:lexer and !(e isa ImbaParseError)
+		e = ImbaParseError.new(e, tokens: e:lexer:tokens, pos: e:lexer:pos)
+	# else
+	#	console.log 'error has no lexer but is parse-error',e:toJSON
+	#	e = {message: e:message}
 	
 	if e:toJSON # isa ImbaParseError
 		# console.log 'converting error to json'

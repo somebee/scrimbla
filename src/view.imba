@@ -737,6 +737,8 @@ tag imview
 				warn:group = 'analysis'
 				hints.add(warn).activate
 
+			WARNS = warnings
+
 			trigger(:annotate,meta)
 			return self if warnings:length
 
