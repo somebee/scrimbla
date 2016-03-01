@@ -420,7 +420,7 @@ export class Highlighter
 		# big hack - adding a space at the end to close up selectors
 		# should rather drop inline and let the parser pair up loose ends?
 		unless tokens
-			tokens = self.tokenize(code,inline: no, silent: yes, rewrite: no)
+			tokens = self.tokenize(code,inline: yes, silent: yes, rewrite: no)
 			tokens = normalizeTokens(code,tokens)
 			logger.log tokens.slice
 
