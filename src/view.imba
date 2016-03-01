@@ -73,8 +73,8 @@ tag imview
 		VIEW = self
 
 		# need better control of this
-		if Imba.CLIENT and window:innerWidth > 600
-			tabindex = 0
+		if $web$
+			tabindex = 0 if window:innerWidth > 600
 
 		@readonly = no
 		@logger = Logger.new(self)
