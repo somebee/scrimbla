@@ -32,9 +32,7 @@
 
   },
   "dependencies": {
-    "imba": "^0.14.2",
-    "imba-loader": "^1.0.1",
-    "source-map": "^0.5.1",
-    "webpack": "^1.12.9"
+    "imba": "^0.15.0-alpha.1",
+    "source-map": "^0.5.1"
   }
 }
