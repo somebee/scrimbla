@@ -53,6 +53,7 @@ tag imview
 	prop readonly
 	prop listeners
 	prop worker
+	prop input
 
 	def highlighter
 		Highlighter
@@ -81,6 +82,7 @@ tag imview
 		@frames = 0
 		@changes = 0
 
+		@carets = [@caret = <imcaret.caret.local view=self>]
 		@listeners = ListenerManager.new(self)
 		@hints     = Hints.new(self)
 		@buffer    = Buffer.new(self)
@@ -88,15 +90,14 @@ tag imview
 		@shortcuts = ShortcutManager.new(self)
 		render
 		@observer  = Observer.new(self)
-		caret.region = Region.new(0,0,root,self)
+
+		@caret.region = Region.new(0,0,root,self)
 
 		# bind to mousemove of dom?
-
 		dom.addEventListener('mouseover') do |e| Imba.Events.delegate(e)
 		dom.addEventListener('mouseout') do |e| Imba.Events.delegate(e)
 
 		worker ||= IM.worker # imba specific
-		input ||= IM.captor
 		self
 
 	def onmouseover e
@@ -105,15 +106,12 @@ tag imview
 	def onmouseout e
 		e.halt.silence
 
-	def input= input
-
-		if input != @input
-			@input = input
-			@input.dom:_responder = dom
+	def onevent e
+		if e.responder
+			unless e.isSilenced
+				scheduler.mark
+			e.silence
 		self
-
-	def input
-		@input or @caret.input
 
 	# called every frame - looking for changed nodes to deal with
 	# to deal with mutations.
@@ -145,8 +143,7 @@ tag imview
 		hints.cleanup
 
 		delay('didchange',50) do
-			# really though?
-			Imba.Events.trigger('edited:async',self,data: self)
+			trigger('edited:async')
 
 		# we can improve how/when we choose to annotate.
 		# currently we do it after every edit - but it should
@@ -156,7 +153,6 @@ tag imview
 		# to scopes.
 		delay('annotate',200) do
 			annotate
-		# delay('recompile',-1) # cancel recompilation
 		self
 
 	def dirty
@@ -164,20 +160,15 @@ tag imview
 
 	def activate
 		VIEW = self
-		@input.dom:_responder = dom
-		flag(:active)
-		caret.activate
-		self
+		return self
 
 	def deactivate
-		unflag(:active)
-		caret.deactivate
-		self
+		return self
 
 	def body
 		<imviewbody@body>
 			<imdims@dims> "x"
-			<imcaret@caret view=self>
+			@caret.end
 			<imroot@root.imba view=self>
 
 	def header
@@ -191,6 +182,7 @@ tag imview
 
 	def render
 		<self .readonly=isReadOnly>
+			<@seltext> "x"
 			header
 			body
 			footer
@@ -206,7 +198,6 @@ tag imview
 
 	def buffer
 		@buffer
-		# root.code
 		
 	def size
 		root.size
@@ -231,27 +222,25 @@ tag imview
 		self
 
 	def parse code
-		# here we can parse the full code
 		{highlighted: IM.parse(code)}
 
 	def refocus
-		input.focus unless document:activeElement == input.dom
+		dom.focus unless document:activeElement == dom
 		self
 
-	def oninputfocus e
-		VIEW = self # hack
-		flag('focus')
-
-	def oninputblur e
-		unflag('focus')
-
 	def onfocusin e
-		VIEW = self # hack
+		VIEW = self
 		flag('focus')
+		@caret.activate
+		# this is _only_ to get working copy/paste and textinput event
+		# all native behaviour is cancelled / overridden
+		dom:contentEditable = yes
 		self
 
 	def onfocusout e
 		unflag('focus')
+		dom:contentEditable = no
+		@caret.deactivate
 		self
 
 	def oninput e
@@ -265,6 +254,16 @@ tag imview
 			var ev = Imba.Events.trigger(action:command,self,data: action)
 			log ev
 			self
+
+	def setDummySelection
+		# return self
+		# @seltext.dom:contentEditable = yes
+		var selection = window.getSelection
+		var range = document.createRange
+		range.selectNodeContents(@seltext.dom)
+		selection.removeAllRanges
+		selection.addRange(range)
+		self
 
 	def tryCommand cmd, target, params = []
 		if cmd:context
@@ -339,18 +338,21 @@ tag imview
 		if e.event:which == 229
 			return e.halt
 
+		if sup
+			setDummySelection
+
+		# if safari we do need to make the whole element contentEditable
+
 		if combo.match(/^super\+(c|v|x)$/)
-			# console.log 'matching combo for copy paste'
+			console.log 'matching combo for copy paste'
 			e.halt
 			@awaitCombo = yes
-			refocus
 			return
 
 		if ins != null
 			e.halt.cancel
 			caret.insert(ins)
 			return self
-
 		self
 
 	def onkeypress e
@@ -415,8 +417,7 @@ tag imview
 		return
 
 	def onbeforecopy e
-		log('onbeforecopy',e)
-		input.select
+		log('onbeforecopy',e,caret.text)
 		var data = e.event:clipboardData
 		data.setData('text/plain', caret.text)
 		e.halt
@@ -485,7 +486,7 @@ tag imview
 		caret.head.set(r,c).normalize
 		caret.dirty
 		# console.log 'touch start refocus?'
-		refocus
+		dom.focus
 		self
 
 	def xyToRowCol x,y

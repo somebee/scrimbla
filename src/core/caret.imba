@@ -238,8 +238,12 @@ tag imcaret
 	prop head
 	prop hash
 
+	def initialize
+		@head = @tail = RowCol.new(0,0,self)
+		@hash = "[0,0]"
+		super
+
 	def expand lft = 0, rgt = 0
-		log 'imcaret expand',lft,rgt
 		decollapse
 		var [a,b] = ends
 		a.move(lft)
@@ -538,9 +542,9 @@ tag imcaret
 
 	def blink
 		clearTimeout(@blinker)
-		@caret.unflag(:blink)
+		@caret.flag(:blink)
 		@blinker = setTimeout(&,500) do
-			@caret.flag(:blink)
+			@caret.unflag(:blink)
 			@blinker = setTimeout(&,500) do blink
 			# updating the timeout again
 			# if view.hasFlag('focus')
@@ -553,24 +557,16 @@ tag imcaret
 
 	def deactivate
 		clearTimeout(@blinker)
-		@caret.flag(:blink)
+		@caret.unflag(:blink)
 		self
 
 	def render
-		# var elapsed = (Date.new - @timestamp)
-		# var flip = Math.round(elapsed / 500) % 2
-
-		# if flip != @flip
-		# 	@caret.flag('blink',flip)
-		# 	@flip = flip
-
 		self
 
 	def build
 		tail = head = RowCol.new(0,0,self)
 
 		<self>
-			# <imcaptor@input value='x'>
 			<span.dim> 'x'
 			<imcarethead@caret>
 			<div@lines>

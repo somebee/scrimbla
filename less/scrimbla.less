@@ -24,6 +24,18 @@
 	font-family: @scrimbla-font;
 	tab-size: @scrimbla-tab-size;
 	-webkit-tap-highlight-color: rgba(0,0,0,0);
+
+	.seltext {
+		opacity: 0.0;
+		position: absolute;
+		font-size: 1px;
+		line-height: 1px;
+	}
+
+	& > .body {
+		user-select: none;
+		-webkit-user-select: none;
+	}
 }
 
 ._scrimbla-overlays {
@@ -98,17 +110,19 @@
 		width: 1ch;
 		margin-left: -0.5ch;
 		color: inherit;
-		opacity: 0.99;
+		// opacity: 0.99;
+		opacity: 0.01;
 		// font-weight: bold;
 
 		width: 2px;
 		height: 100%;
 		margin-left: -1px;
 		border-radius: 1px;
+		will-change: opacity;
 		// background: black;
 
 		&.blink {
-			opacity: 0.01;
+			opacity: 0.99;
 		}
 
 		&:befores {
