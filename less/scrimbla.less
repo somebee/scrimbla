@@ -35,6 +35,7 @@
 	& > .body {
 		user-select: none;
 		-webkit-user-select: none;
+		min-height: 2ch;
 	}
 
 	&:not(:focus) .caret.local {
@@ -220,7 +221,8 @@
 }
 
 // fixed-tab
-._imtab {
+
+.emulate-tabs ._imtab {
 	width: (@scrimbla-tab-size * @scrimbla-font-ratio * 1em);
 	display: inline-block;
 	height: 1ex;
