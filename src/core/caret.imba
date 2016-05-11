@@ -1,4 +1,5 @@
 import './util' as util
+import List from './list'
 import Region from '../region'
 import Command from './command'
 
@@ -418,8 +419,10 @@ tag imcaret
 
 		if !isCollapsed
 			let reg = region
-			sub = reg.text
-			view.erase(reg)
+			if reg.size > 0
+				sub = reg.text
+				view.erase(reg)
+
 			collapseToStart
 
 		let move = 0
@@ -483,11 +486,14 @@ tag imcaret
 		# return v + 'ch'
 		(v * 0.6).toFixed(5) + 'em'
 
+	def isLocal
+		yes
+
 	def dirty
 		@timestamp = Date.new
 		# var hash = toArray.join("")
 
-		if @hash != toHash
+		if isLocal and @hash != toHash
 			# the realCol values could have changed though?
 			let old = @hash
 			let new = toHash
@@ -509,6 +515,7 @@ tag imcaret
 		var lc = b.row - a.row
 		var row = a.row
 
+		# this requires calculations based on buffer
 		var ac = a.realCol # Math.min( a.col, util.colsForLine(view.linestr(a.row) ) )
 		var bc = b.realCol # Math.min( b.col, util.colsForLine(view.linestr(b.row) ) )
 		var hc,tc
@@ -558,6 +565,7 @@ tag imcaret
 	def deactivate
 		clearTimeout(@blinker)
 		@caret.unflag(:blink)
+		# change state
 		self
 
 	def render
@@ -581,3 +589,20 @@ tag imcaret
 	def modeDidSet new, old
 		unflag(old)
 		flag(new)
+
+	def destroy
+		deactivate
+		view.carets.remove(self)
+		self
+
+tag remotecaret < imcaret
+
+	def isLocal
+		no
+
+export class Carets < List
+
+	def initialize view
+		@view = view
+		@array = []
+		self

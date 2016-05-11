@@ -90,7 +90,6 @@
 
 ._imcaret {
 	.hw-layer;
-
 	position: absolute;
 	width: 100%;
 	pointer-events: none;
@@ -199,6 +198,16 @@
 	&.multi {
 		// .mid { display: none; }
 		.start { width: auto !important; }
+	}
+
+	&.remote .caret {
+		@size: 4px;
+		width: (@size * 2);
+		border: @size solid transparent;
+		border-top: @size solid #FFFB60;
+		background: transparent !important;
+		box-sizing: border-box;
+		margin-left: -@size;
 	}
 }
 

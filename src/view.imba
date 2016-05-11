@@ -12,6 +12,7 @@ import Logger from './core/logger'
 import History from './core/history'
 import Buffer from './core/buffer'
 import Observer from './core/observer'
+import Carets from './core/caret'
 
 import Region from './region'
 import Hints,Hint from './core/hints'
@@ -21,8 +22,6 @@ import Command,TextCommand from './core/command'
 
 GCOMMAND = Command
 import './core/util' as util
-
-require './core/caret'
 
 require './views/overlays'
 
@@ -49,6 +48,8 @@ tag imview
 	prop shortcuts
 	prop focusNode watch: yes
 	prop caret
+	prop carets
+
 	prop frames
 	prop readonly
 	prop listeners
@@ -82,7 +83,9 @@ tag imview
 		@frames = 0
 		@changes = 0
 
-		@carets = [@caret = <imcaret.caret.local view=self>]
+		@carets = Carets.new(self)
+		@carets.add(@caret = <imcaret.caret.local view=self>)
+
 		@listeners = ListenerManager.new(self)
 		@hints     = Hints.new(self)
 		@buffer    = Buffer.new(self)
@@ -167,8 +170,7 @@ tag imview
 
 	def body
 		<imviewbody@body>
-			<imdims@dims> "x"
-			@caret.end
+			carets.map(|caret| caret.end)
 			<imroot@root.imba view=self>
 
 	def header
@@ -183,6 +185,7 @@ tag imview
 	def render
 		<self .readonly=isReadOnly>
 			<@seltext> "x"
+			<imdims@dims> "x"
 			header
 			body
 			footer
