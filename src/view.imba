@@ -86,11 +86,12 @@ tag imview
 		@changes = 0
 
 		@carets = Carets.new(self)
-		@carets.add(@caret = <imcaret.caret.local view=self>)
+		@carets.add(@mark = @caret = Caret.new(self))
+		# <imcaret.caret.local view=self>
 
 		# custom temporary
 		@marks = Carets.new(self)
-		@marks.add(@mark = Caret.new(self))		
+		# @marks.add(@mark = Caret.new(self))		
 
 		@listeners = ListenerManager.new(self)
 		@hints     = Hints.new(self)
@@ -100,7 +101,7 @@ tag imview
 		render
 		@observer  = Observer.new(self)
 
-		@caret.region = Region.new(0,0,root,self)
+		# @caret.region = Region.new(0,0,root,self)
 
 		
 
@@ -178,8 +179,8 @@ tag imview
 
 	def body
 		<imviewbody@body>
-			carets.map(|caret| caret.end)
-			@marks.map(|mark| mark.node.end)
+			carets.map(|caret| caret.node.end)
+			# @marks.map(|mark| mark.node.end)
 			<imroot@root.imba view=self>
 
 	def header
@@ -580,7 +581,8 @@ tag imview
 	def erased reg
 		for hint in hints
 			hint.adjust(reg,no)
-		if caret in carets
+
+		for caret in carets
 			caret.adjust(reg,no)
 
 		for mark in @marks

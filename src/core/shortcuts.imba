@@ -195,12 +195,13 @@ IM.KeyBindings = [
 	
 	combo ["return",'shift+return','super+return'] do |sel|
 		var ind = sel.indent
-		ind += '\t' if util.increaseIndent(sel.head.peekbehind)
+		ind += '\t' if util.increaseIndent(sel.buffer.substringBeforeLoc(sel.region.a))
 
 		# should not happen in string
+		# 
 		if sel.region.peek(-1,1) in ['[]','{}','()']
 			sel.insert('\n\t' + ind)
-			sel.view.insert(sel.head.loc,'\n' + ind)
+			sel.view.insert(sel.region.b,'\n' + ind)
 		else
 			sel.insert('\n' + ind)
 
@@ -215,18 +216,25 @@ IM.KeyBindings = [
 
 		sel.insert(' ')
 
-	combo ['tab'] do |sel| sel.insert('\t')
-
+	combo ['tab'] do |sel|
+		sel.insert('\t')
 
 	combo ['super+up'] do |sel|
 		# FIXME work with new caret
-		sel.collapse.head.set(0,0).normalize
-		sel.dirty
+		sel.collapsed = yes
+		sel.set([0,0])
+		sel.modified
+		# should be included in modified
 
 	combo ['super+down'] do |sel|
 		# FIXME work with new caret
-		sel.collapse.head.set(100000,0).normalize
-		sel.dirty
+		console.log 'super+down',sel
+		sel.collapsed = yes
+		sel.moveTo(sel.buffer.size)
+		sel.modified
+
+		# sel.collapse.head.set(100000,0).normalize
+		# sel.dirty
 
 	combo ['super+u'] do |sel,o|
 		console.log sel.target, "found ut!!!"

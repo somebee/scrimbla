@@ -53,10 +53,11 @@ export class Region
 			if rel.start <= start
 				move(rel.size)
 		else
-			if rel.end <= start
-				move(-rel.size)
-			elif equals(rel)
+			if equals(rel)
+				# console.log "ADJUST EQUALS!!!",rel,self
 				collapseToStart
+			elif rel.end <= start
+				move(-rel.size)
 
 		self
 

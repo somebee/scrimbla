@@ -8,6 +8,7 @@ export class Caret
 	prop view
 	prop region
 	prop collapsed
+	prop active
 	# remember column
 
 	def buffer
@@ -24,14 +25,30 @@ export class Caret
 		region.adjust(rel,ins)
 		self
 
+	def set region
+		console.log 'Caret.set',region
+		self.region = Region.normalize(region,view)
+		self
+
 	def destroy
 		deactivate
 		view.carets.remove(self)
 		self
 
+	def activate
+		active = yes
+		self
+
+	def deactivate
+		active = no
+		self
+
+	def modified
+		view.listeners.emit('SelectionModified',region,self)
+		self
 	# what does this do?
 	def normalize
-		head.normalize
+		# head.normalize
 		self
 
 	def isCollapsed
@@ -50,6 +67,7 @@ export class Caret
 		console.log 'move caret-mark',offset,mode
 		region.b += offset
 		region.collapseToHead if collapsed
+		modified
 		return self
 
 	def expand a = 0, b = 0
@@ -172,11 +190,21 @@ export class Caret
 	def peekahead
 		buffer.substringAfterLoc(region.end)
 
+	def indent
+		var str = buffer.linestringForLoc(region.start)
+		var ind = str.match(/^(\t*)/)[0]
+		return ind
+
 	def model
 		self
 
 	def node
 		@node ||= <caretview[self]>
+
+export class RemoteCaret < Caret
+	
+	def node
+		@node ||= <caretview[self].remote>
 
 export class Carets < List
 

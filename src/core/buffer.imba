@@ -42,6 +42,9 @@ export class Buffer
 	def len
 		@buffer:length
 
+	def size
+		len
+
 	# location to 
 	def loc-to-rc loc
 		util.rowcol(self, loc)
@@ -159,10 +162,16 @@ export class Buffer
 
 		return loc
 
+	def linestringForLoc loc
+		var a = offsetFromLoc(loc,IM.LINE_START)
+		var b = offsetFromLoc(loc,IM.LINE_END)
+		return @buffer.substr(a,b - a)
+
+
 	def substringBeforeLoc loc
 		var a = offsetFromLoc(loc,IM.LINE_START)
 		return @buffer.substr(a,loc - a)
 
 	def substringAfterLoc loc
 		var b = offsetFromLoc(loc,IM.LINE_END)
-		return @buffer.substr(loc,loc b - loc)
+		return @buffer.substr(loc,b - loc)
