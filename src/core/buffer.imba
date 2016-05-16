@@ -91,6 +91,22 @@ export class Buffer
 			pos--
 
 		return @cache[loc] = [row,col]
+
+	def cellToLoc cell
+		var loc = 0
+		var row = cell[0]
+		var col = cell[1]
+		var lines = lines
+
+		for line,i in lines
+			if i < row
+				loc += line:length + 1 # the last line
+			elif i == row
+				var colLoc = util.colToLoc(line,col)
+				loc += colLoc
+			else
+				break
+		return loc
 		
 	def substr region, len
 		if region isa Region

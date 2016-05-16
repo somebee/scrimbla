@@ -323,10 +323,12 @@ tag imview
 
 			if arr[0] == 'down'
 				caret.moveDown
+				@mark.moveDown
 				return e.cancel
 
 			elif arr[0] == 'up'
 				caret.moveUp
+				@mark.moveUp
 				return e.cancel
 
 			let mode = IM.CHAR

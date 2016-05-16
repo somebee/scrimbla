@@ -11,7 +11,7 @@ export class Caret
 	# remember column
 
 	def buffer
-		view.buffer
+		view.@buffer
 
 	def initialize view
 		@view = view # should rather be for buffer, no?
@@ -71,6 +71,25 @@ export class Caret
 			region.collapseToHead if collapsed
 		# head.alter(mode,offset)
 		return self
+
+	def moveUp
+		# first remember the current column
+		var curr = buffer.locToCell(region.b)
+		var cell = [curr[0] - 1,curr[1]]
+		var loc = buffer.cellToLoc(cell)
+		console.log 'move down from',curr,cell,loc
+		move(loc - region.b) # simply move by that amount
+		self
+
+	def moveDown
+		# var cell = region.cell
+		var curr = buffer.locToCell(region.b)
+		var cell = [curr[0] + 1,curr[1]]
+		console.log 'move down from',curr,cell
+		var loc = buffer.cellToLoc(cell)
+		move(loc - region.b) # simply move by that amount
+		# first remember the current column
+		self
 
 	def collapseToStart
 		region.collapseToStart
