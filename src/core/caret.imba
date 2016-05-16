@@ -20,24 +20,8 @@ export class Caret
 		self
 
 	def adjust rel, ins = yes
-		return self unless region
-
 		console.log 'adjust',rel.a,rel.b,region.a,region.b,ins,rel.size
-
 		region.adjust(rel,ins)
-
-		# if ins
-		# 	if rel.start <= region.start
-		# 		region.move(rel.size)
-		# else
-		# 	if rel.end <= region.start
-		# 		region.move(-rel.size)
-
-		# what if it intersects?
-		# if rel.end <= region.start
-		#	ins ? region.move(rel.size) : region.move(-rel.size)
-		#	# add ? move(rel.size) : move(-rel.size)
-		# region.adjust(reg,ins)
 		self
 
 	def destroy
@@ -62,26 +46,15 @@ export class Caret
 		# tail = head.clone if tail == head
 		self
 
-	def selectAll
-		collapsed = no
-		# why change the previous region instead of creating a new one?
-		region.a = 0
-		region.b = buffer.len
-		self
-
-	# should be possible to do for regions directly?
-	def expandToLines
-		selectable
-		var [a,b] = ends
-		a.col = 0
-		b.col = 1000
-		dirty
-
 	def move offset = 1, mode = 0
 		console.log 'move caret-mark',offset,mode
 		region.b += offset
 		region.collapseToHead if collapsed
 		return self
+
+	def expand a = 0, b = 0
+		region.expand(a,b)
+		self
 
 	def alter offset = 1, mode = 0
 		if mode == IM.CHAR
@@ -124,6 +97,19 @@ export class Caret
 	def collapseToEnd
 		region.collapseToEnd
 
+	def expandToLines
+		console.log 'caret expandToLines'
+		region.a = buffer.offsetFromLoc(region.a,IM.LINE_START)
+		region.b = buffer.offsetFromLoc(region.b,IM.LINE_END)
+		self
+
+	def selectAll
+		collapsed = no
+		# why change the previous region instead of creating a new one?
+		region.a = 0
+		region.b = buffer.len
+		self
+
 	def insert text, edit
 		var sub = ''
 		view.history.mark('action')
@@ -161,9 +147,10 @@ export class Caret
 		return self
 
 	def erase mode
+		console.log 'erase!!'
 		view.history.mark('action')
 
-		if collapsed
+		if region.size == 0 # collapsed
 			console.log 'isCollapsed',mode
 			collapsed = no
 			move(-1)
@@ -172,6 +159,21 @@ export class Caret
 		view.erase(region)
 		collapseToStart
 		return self
+
+	def dirty
+		self
+
+	def text
+		region.text
+
+	def peekbehind
+		buffer.substringBeforeLoc(region.start)
+
+	def peekahead
+		buffer.substringAfterLoc(region.end)
+
+	def model
+		self
 
 	def node
 		@node ||= <caretview[self]>

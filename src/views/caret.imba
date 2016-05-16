@@ -627,6 +627,9 @@ tag imcaret
 		region.adjust(reg,ins)
 		self
 
+	def model
+		view.@mark
+
 tag remotecaret < imcaret
 
 	def isLocal

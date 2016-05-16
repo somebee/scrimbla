@@ -122,13 +122,15 @@ IM.KeyBindings = [
 	
 
 	combo ['tab']
-		context: do |sel| sel.text.indexOf('\n') >= 0
+		context: do |sel| sel.model.text.indexOf('\n') >= 0
 		command: do |sel|
+			sel = sel.model
 			sel.expandToLines
 			var region = sel.region
 			var nodes = sel.view.nodesInRegion(region)
 
 			nodes.map do |match|
+				# should use buffer directly - no nodes
 				if match:node.matches('._imnewline')
 					console.log 'found tab in selection',match
 					unless match:mode == 'start'
@@ -165,8 +167,8 @@ IM.KeyBindings = [
 
 		command: do |sel|
 			console.log 'moving!!'
-			sel.expand(-1,1)
-			sel.erase
+			sel.model.expand(-1,1)
+			sel.model.erase
 
 	combo ["backspace"]
 		context: do |sel,o|
@@ -175,13 +177,16 @@ IM.KeyBindings = [
 				if o:node = reg.prevNode('._impair,._imstr')
 					return yes
 
-		command: do |sel,o| sel.region = o:node.region.clone.reverse
+		command: do |sel,o|
+			# not sure about this one
+			sel.region = o:node.region.clone.reverse
 	
 	combo ["backspace"]
 		context: do |sel,o|
 			if sel.text and !util.stringIsBalanced(sel.text)
 				return yes
-		command: do |sel,o| yes # noop
+		command: do |sel,o|
+			yes # noop
 
 	combo ["backspace"] do |sel| sel.erase
 	combo ["shift+backspace"] do |sel| sel.erase
@@ -189,21 +194,23 @@ IM.KeyBindings = [
 	combo ["super+backspace"] do |sel| sel.erase(IM.LINE_START)
 	
 	combo ["return",'shift+return','super+return'] do |sel|
-			var ind = sel.indent
-			ind += '\t' if util.increaseIndent(sel.head.peekbehind)
+		var ind = sel.indent
+		ind += '\t' if util.increaseIndent(sel.head.peekbehind)
 
-			# should not happen in string
-			if sel.region.peek(-1,1) in ['[]','{}','()']
-				sel.insert('\n\t' + ind)
-				sel.view.insert(sel.head.loc,'\n' + ind)
-			else
-				sel.insert('\n' + ind)
+		# should not happen in string
+		if sel.region.peek(-1,1) in ['[]','{}','()']
+			sel.insert('\n\t' + ind)
+			sel.view.insert(sel.head.loc,'\n' + ind)
+		else
+			sel.insert('\n' + ind)
 
-			return yes
+		return yes
 
 
 	combo ['space','shift+space'] do |sel|
 		if sel.region.peek(-1,1) == '<>'
+			# FIXME need to work with new caret
+			# also - track move-event
 			sel.move(1).erase
 
 		sel.insert(' ')
@@ -212,10 +219,12 @@ IM.KeyBindings = [
 
 
 	combo ['super+up'] do |sel|
+		# FIXME work with new caret
 		sel.collapse.head.set(0,0).normalize
 		sel.dirty
 
 	combo ['super+down'] do |sel|
+		# FIXME work with new caret
 		sel.collapse.head.set(100000,0).normalize
 		sel.dirty
 

@@ -6,6 +6,9 @@ export tag RangeView
 	prop col watch: yes
 	prop len watch: yes
 
+	def buffer
+		view.@buffer
+
 	def rowDidSet new, old
 		var val = "{new * view.lineHeight}px"
 		@dom:style:top = val
@@ -21,9 +24,15 @@ export tag RangeView
 	def render
 		let reg = region
 
-		if reg
-			row = region.row
-			col = region.col
-			len = region.size
+		var a = buffer.locToCell(region.start)
+		var b = buffer.locToCell(region.end)
+			
+		# multiple lines
+		if a[0] != b[0]
+			yes
+		else
+			row = reg.row
+			col = reg.col
+			len = reg.size
 
 		<self.RangeView> '|'

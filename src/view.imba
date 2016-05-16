@@ -313,22 +313,18 @@ tag imview
 		if let arr = combo.match(/\b(left|right|up|down)/)
 			hints.activate
 
-			let isCollapsed = caret.isCollapsed
-			let ends = caret.ends
-
-
 			@mark.collapsed = !shift
 
-			shift ? caret.decollapse : caret.collapse
+			# shift ? caret.decollapse : caret.collapse
 
 			if arr[0] == 'down'
-				caret.moveDown
-				@mark.moveDown
+				# caret.moveDown
+				localCaret.moveDown
 				return e.cancel
 
 			elif arr[0] == 'up'
-				caret.moveUp
-				@mark.moveUp
+				# caret.moveUp
+				localCaret.moveUp
 				return e.cancel
 
 			let mode = IM.CHAR
@@ -349,12 +345,12 @@ tag imview
 			elif !shift and @mark.region.size > 0
 				# this basically collapses the marker
 				dir > 0 ? @mark.collapseToEnd : @mark.collapseToStart
-				caret.head.set(dir > 0 ? ends[1] : ends[0])
-				caret.dirty # should not need to call this all the time
+				# caret.head.set(dir > 0 ? ends[1] : ends[0])
+				# caret.dirty # should not need to call this all the time
 				return e.cancel
 
-			caret.move(dir,mode)
-			@mark.alter(dir,mode)
+			# caret.move(dir,mode)
+			localCaret.alter(dir,mode)
 
 			return e.cancel
 
@@ -375,9 +371,12 @@ tag imview
 		if ins != null
 			e.halt.cancel
 			console.log 'caret.insert directly?!'
-			caret.insert(ins)
+			localCaret.insert(ins)
 			return self
 		self
+
+	def localCaret
+		@mark
 
 	def onkeypress e
 		if @awaitCombo
@@ -414,7 +413,7 @@ tag imview
 			var ins = e.@text
 			# log 'ontype',e,ins
 
-			let spans = view.nodesInRegion(caret.region,no,yes)
+			let spans = view.nodesInRegion(localCaret.region,no,yes)
 			let target = spans[0]
 			let cmd
 
@@ -422,7 +421,7 @@ tag imview
 				# log 'single node for nodesInRegion',target:node
 				if cmd = target:node["trigger-{ins}"]
 					# log "found combo for this!??!",cmd
-					if tryCommand(cmd,caret,[target:node,target])
+					if tryCommand(cmd,localCaret,[target:node,target])
 						return self
 
 			cmd = shortcuts.getTrigger(self,ins)
@@ -430,28 +429,28 @@ tag imview
 			if cmd and cmd:command isa Function
 				# log 'found command!!',cmd
 				# should rather run tryCommand?!?
-				cmd.command(caret,self,ins,e)
+				cmd.command(localCaret,self,ins,e)
 			else
-				caret.insert(ins) if ins
+				localCaret.insert(ins) if ins
 			
 		catch e
 			log 'error from ontype'
 
 	def onbackspace e
 		e.cancel.halt
-		caret.erase
+		localCaret.erase
 		return
 
 	def onbeforecopy e
-		log('onbeforecopy',e,caret.text)
+		log('onbeforecopy',e,localCaret.text)
 		var data = e.event:clipboardData
-		data.setData('text/plain', caret.text)
+		data.setData('text/plain', localCaret.text)
 		e.halt
 
 	def oncopy e
-		log('oncopy',e,caret.text)
+		log('oncopy',e,localCaret.text)
 		var data = e.event:clipboardData
-		data.setData('text/plain', caret.text)
+		data.setData('text/plain', localCaret.text)
 		e.halt.cancel
 		refocus
 		return
@@ -459,9 +458,9 @@ tag imview
 	def oncut e
 		log 'oncut',e
 		var data = e.event:clipboardData
-		data.setData('text/plain', caret.text)
+		data.setData('text/plain', localCaret.text)
 		e.halt.cancel
-		caret.erase
+		localCaret.erase
 
 	def onbeforepaste e
 		log 'onbeforepaste',e
@@ -471,12 +470,12 @@ tag imview
 		var data = e.event:clipboardData
 		var text = data.getData('text/plain')
 		e.halt.cancel
-		caret.insert(text)
+		localCaret.insert(text)
 		refocus
 		repair
 
 	def refresh
-		caret.render
+		# localCaret.render
 		self
 
 	def exec o
@@ -502,17 +501,17 @@ tag imview
 		# see if shift is down? should change behaviour
 		var shift = e:shiftKey
 		# log 'ontouchstart',touch,touch.x,touch.y,e,touch.button
-		var [r,c] = rcForTouch(touch)
+		# var [r,c] = rcForTouch(touch)
 
-		if shift
-			caret.selectable
-		else
-			caret.collapse
+		# if shift
+		# 	caret.selectable
+		# else
+		# 	caret.collapse
 
 		@mark.collapsed = !shift
 
-		caret.head.set(r,c).normalize
-		caret.dirty
+		# caret.head.set(r,c).normalize
+		# caret.dirty
 		# console.log 'touch start refocus?'
 		dom.focus
 		self
@@ -532,12 +531,12 @@ tag imview
 		var [r,c] = rcForTouch(touch)
 
 		# @mark.collapsed = no
-		@mark.moveTo(@buffer.cellToLoc([r,c]))
-		@mark.collapsed = no
+		localCaret.moveTo(@buffer.cellToLoc([r,c]))
+		localCaret.collapsed = no
 
-		caret.selectable
-		caret.head.set(r,c).normalize
-		caret.dirty
+		# caret.selectable
+		# caret.head.set(r,c).normalize
+		# caret.dirty
 		self
 
 	def ontouchend touch
@@ -545,14 +544,14 @@ tag imview
 		var [r,c] = rcForTouch(touch)
 
 		# @mark.collapsed = no
-		@mark.moveTo(@buffer.cellToLoc([r,c]))
-		if @mark.region.size == 0
+		localCaret.moveTo(@buffer.cellToLoc([r,c]))
+		if localCaret.region.size == 0
 			console.log 'collapsed!'
-			@mark.collapsed = yes
+			localCaret.collapsed = yes
 
-		caret.head.set(r,c).normalize
-		caret.dirty 
-		caret.blink # only if editor is active?
+		# caret.head.set(r,c).normalize
+		# caret.dirty 
+		# caret.blink # only if editor is active?
 		self
 
 	def erase reg, edit
@@ -846,7 +845,7 @@ tag imview
 		{
 			html: root.dom:innerHTML
 			code: root.code
-			selection: caret.region
+			selection: localCaret.region
 			timestamp: Date.new
 		}
 
@@ -857,7 +856,7 @@ tag imview
 			elif o:code
 				load(o:code)
 			if o:selection
-				caret.region = o:selection
+				localCaret.region = o:selection
 		return self
 
 	def loadSession session
@@ -1086,7 +1085,7 @@ tag imview
 		{
 			body: buffer.toString
 			html: root.dom:innerHTML
-			caret: caret.toArray
+			caret: localCaret.toArray
 			changes: @changes
 		}
 
@@ -1096,8 +1095,8 @@ tag imview
 			load(o:body,o)
 
 		if o:caret
-			caret.set o:caret
-			caret.dirty
+			localCaret.set o:caret
+			# caret.dirty
 		self
 
 	def toJSON
