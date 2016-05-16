@@ -49,8 +49,15 @@ export class Region
 			start <= rel and end >= rel
 
 	def adjust rel, add = yes
-		if rel.end < start
-			add ? move(rel.size) : move(-rel.size)
+		if add
+			if rel.start <= start
+				move(rel.size)
+		else
+			if rel.end <= start
+				move(-rel.size)
+			elif equals(rel)
+				collapseToStart
+
 		self
 
 	def intersects rel

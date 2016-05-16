@@ -509,6 +509,8 @@ tag imview
 		else
 			caret.collapse
 
+		@mark.collapsed = !shift
+
 		caret.head.set(r,c).normalize
 		caret.dirty
 		# console.log 'touch start refocus?'
@@ -528,6 +530,11 @@ tag imview
 	def ontouchupdate touch
 		return unless touch.button == 0
 		var [r,c] = rcForTouch(touch)
+
+		# @mark.collapsed = no
+		@mark.moveTo(@buffer.cellToLoc([r,c]))
+		@mark.collapsed = no
+
 		caret.selectable
 		caret.head.set(r,c).normalize
 		caret.dirty
@@ -536,6 +543,10 @@ tag imview
 	def ontouchend touch
 		return unless touch.button == 0
 		var [r,c] = rcForTouch(touch)
+
+		# @mark.collapsed = no
+		@mark.moveTo(@buffer.cellToLoc([r,c]))
+
 		caret.head.set(r,c).normalize
 		caret.dirty 
 		caret.blink # only if editor is active?
@@ -569,6 +580,10 @@ tag imview
 			hint.adjust(reg,no)
 		if caret in carets
 			caret.adjust(reg,no)
+
+		for mark in @marks
+			mark.adjust(reg,no)
+
 		edited
 		repair # repair synchronously
 
@@ -666,8 +681,12 @@ tag imview
 		var reg = Region.new(loc,loc + str:length,null,self)
 		for hint in hints
 			hint.adjust(reg,yes)
+
 		for caret in carets
 			caret.adjust(reg,yes)
+
+		for mark in @marks
+			mark.adjust(reg,yes)
 
 		edited
 		repair if util.isWhitespace(str)

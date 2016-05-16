@@ -19,9 +19,25 @@ export class Caret
 		@collapsed = yes
 		self
 
-	def adjust reg, ins = yes
+	def adjust rel, ins = yes
 		return self unless region
-		region.adjust(reg,ins)
+
+		console.log 'adjust',rel.a,rel.b,region.a,region.b,ins,rel.size
+
+		region.adjust(rel,ins)
+
+		# if ins
+		# 	if rel.start <= region.start
+		# 		region.move(rel.size)
+		# else
+		# 	if rel.end <= region.start
+		# 		region.move(-rel.size)
+
+		# what if it intersects?
+		# if rel.end <= region.start
+		#	ins ? region.move(rel.size) : region.move(-rel.size)
+		#	# add ? move(rel.size) : move(-rel.size)
+		# region.adjust(reg,ins)
 		self
 
 	def destroy
@@ -71,6 +87,9 @@ export class Caret
 			region.collapseToHead if collapsed
 		# head.alter(mode,offset)
 		return self
+
+	def moveTo loc
+		move(loc - region.b)
 
 	def moveUp
 		# first remember the current column
