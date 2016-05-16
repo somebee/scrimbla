@@ -1,3 +1,5 @@
+export tag LineRangeView
+
 export tag RangeView
 
 	prop view
@@ -23,16 +25,31 @@ export tag RangeView
 
 	def render
 		let reg = region
+		return self unless reg
+		
 
 		var a = buffer.locToCell(region.start)
 		var b = buffer.locToCell(region.end)
 			
 		# multiple lines
-		if a[0] != b[0]
-			yes
-		else
-			row = reg.row
-			col = reg.col
-			len = reg.size
+		var row = a[0]
+		var lc = (b[0] - a[0]) + 1
+		self.row = row
 
-		<self.RangeView> '|'
+		# create the initial one
+		var reg1 = [0,a[1],lc == 1 ? (b[1] - a[1]) : (80 - a[1])]	
+		var regions = [reg1]
+
+		var r = 0
+
+		while b[0] > row
+			row++
+			var r = row - a[0]
+			var c = 0
+			var l = row == b[0] ? b[1] : 80
+			regions.push([r,c,l])
+
+		<self.RangeView>
+			# far from idea
+			for reg in regions
+				<RangeView.part view=view row=reg[0] col=reg[1] len=reg[2]> '|'

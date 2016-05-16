@@ -162,7 +162,7 @@ IM.KeyBindings = [
 
 	combo ["backspace"]
 		context: do |e|
-			console.log 'deleteLeftRight backspace?!?',e.region,e.region.peek(-1,1)
+			console.log 'deleteLeftRight backspace?!?',e,e.region,e.region.peek(-1,1)
 			return e.region.peek(-1,1) in ['[]','{}','<>','()','""',"''"]
 
 		command: do |sel|
@@ -327,7 +327,7 @@ global class ShortcutManager
 				# will match on parts now?!
 				var o = {}
 				# console.log 'found shortcut',combo,cmd:keys
-				if !cmd:context or cmd:context.call(view,view.caret,o,e,view)
+				if !cmd:context or cmd:context.call(view,view.localCaret,o,e,view)
 					cmd:data = o
 					return cmd
 
@@ -336,7 +336,7 @@ global class ShortcutManager
 	def getTrigger view, text
 		for cmd in IM.Triggers
 			if cmd:trigger == text
-				var res = cmd:context ? cmd:context.call(view,view.caret,view,text) : yes
+				var res = cmd:context ? cmd:context.call(view,view.localCaret,view,text) : yes
 				return cmd if res
 		return null
 
