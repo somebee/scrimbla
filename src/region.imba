@@ -109,6 +109,20 @@ export class Region
 			@a = @b = start
 		self
 
+	def collapseToHead
+		@a = @b
+		self
+
+	def collapseToTail
+		@b = @a
+		self
+
+	def collapseToStart
+		@a = @b = start
+
+	def collapseToEnd
+		@a = @b = end
+
 	# expand to closest /n
 	def expand atStart, atEnd
 		if b < a
@@ -188,7 +202,7 @@ export class Region
 		self
 
 	def cell
-		view.@buffer.locToCell(a)
+		view.@buffer.locToCell(start)
 
 	def row
 		cell[0]

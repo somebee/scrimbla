@@ -12,7 +12,7 @@ import Logger from './core/logger'
 import History from './core/history'
 import Buffer from './core/buffer'
 import Observer from './core/observer'
-import Carets from './core/caret'
+import Carets,Caret from './core/caret'
 
 import Region from './region'
 import Hints,Hint from './core/hints'
@@ -20,9 +20,11 @@ import Highlighter from './core/highlighter'
 import ListenerManager, Listener from './core/listener'
 import Command,TextCommand from './core/command'
 
+
 GCOMMAND = Command
 import './core/util' as util
 
+import CaretView from './views/caret'
 require './views/overlays'
 
 tag imdims
@@ -86,6 +88,10 @@ tag imview
 		@carets = Carets.new(self)
 		@carets.add(@caret = <imcaret.caret.local view=self>)
 
+		# custom temporary
+		@marks = Carets.new(self)
+		@marks.add(@mark = Caret.new(self))		
+
 		@listeners = ListenerManager.new(self)
 		@hints     = Hints.new(self)
 		@buffer    = Buffer.new(self)
@@ -95,6 +101,8 @@ tag imview
 		@observer  = Observer.new(self)
 
 		@caret.region = Region.new(0,0,root,self)
+
+		
 
 		# bind to mousemove of dom?
 		dom.addEventListener('mouseover') do |e| Imba.Events.delegate(e)
@@ -171,6 +179,7 @@ tag imview
 	def body
 		<imviewbody@body>
 			carets.map(|caret| caret.end)
+			@marks.map(|mark| mark.node.end)
 			<imroot@root.imba view=self>
 
 	def header
@@ -307,6 +316,9 @@ tag imview
 			let isCollapsed = caret.isCollapsed
 			let ends = caret.ends
 
+
+			@mark.collapsed = !shift
+
 			shift ? caret.decollapse : caret.collapse
 
 			if arr[0] == 'down'
@@ -317,7 +329,7 @@ tag imview
 				caret.moveUp
 				return e.cancel
 
-			let mode = IM.CHARACTERS
+			let mode = IM.CHAR
 			let dir = 0
 
 			if arr[0] == 'left'
@@ -333,11 +345,14 @@ tag imview
 				mode = dir > 0 ? IM.LINE_END : IM.LINE_START
 
 			elif !shift and !isCollapsed
+				# this basically collapses the marker
+				dir > 0 ? @mark.collapseToEnd : @mark.collapseToStart
 				caret.head.set(dir > 0 ? ends[1] : ends[0])
 				caret.dirty # should not need to call this all the time
 				return e.cancel
 
 			caret.move(dir,mode)
+			@mark.move(dir,mode)
 
 			return e.cancel
 
@@ -550,6 +565,8 @@ tag imview
 	def erased reg
 		for hint in hints
 			hint.adjust(reg,no)
+		if caret in carets
+			caret.adjust(reg,no)
 		edited
 		repair # repair synchronously
 
@@ -647,6 +664,8 @@ tag imview
 		var reg = Region.new(loc,loc + str:length,null,self)
 		for hint in hints
 			hint.adjust(reg,yes)
+		for caret in carets
+			caret.adjust(reg,yes)
 
 		edited
 		repair if util.isWhitespace(str)

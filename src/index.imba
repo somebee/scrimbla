@@ -31,6 +31,7 @@ require './core/logger'
 require './core/shortcuts'
 
 require "./views/captor"
+require "./views/caret"
 require "./view"
 require "./editor"
 
