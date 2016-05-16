@@ -346,7 +346,7 @@ tag imview
 			elif sup
 				mode = dir > 0 ? IM.LINE_END : IM.LINE_START
 
-			elif !shift and !isCollapsed
+			elif !shift and @mark.region.size > 0
 				# this basically collapses the marker
 				dir > 0 ? @mark.collapseToEnd : @mark.collapseToStart
 				caret.head.set(dir > 0 ? ends[1] : ends[0])
@@ -354,7 +354,7 @@ tag imview
 				return e.cancel
 
 			caret.move(dir,mode)
-			@mark.move(dir,mode)
+			@mark.alter(dir,mode)
 
 			return e.cancel
 
@@ -546,6 +546,9 @@ tag imview
 
 		# @mark.collapsed = no
 		@mark.moveTo(@buffer.cellToLoc([r,c]))
+		if @mark.region.size == 0
+			console.log 'collapsed!'
+			@mark.collapsed = yes
 
 		caret.head.set(r,c).normalize
 		caret.dirty 

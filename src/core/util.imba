@@ -67,6 +67,9 @@ export def colToLoc line, col, tabsize = 4
 	while char = line[ci++]
 		if char == '\t'
 			var rest = tabsize - rci % tabsize
+			if rest > 3 and col <= rci + 2
+				return ci - 1
+
 			rci += rest
 		else
 			rci += 1

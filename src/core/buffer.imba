@@ -121,3 +121,66 @@ export class Buffer
 		@buffer or ''
 
 	# analysis should happen in the buffer, not in the view?
+
+	def offsetFromLoc loc, mode
+		# should be able to do this without using views
+		# should instead iterate with pairings etc
+		var nodes = view.nodesInRegion(loc)
+		var node = nodes[0]
+		var mid = node and node:node
+		var lft = nodes:prev and nodes:prev:node
+		var rgt = nodes:next and nodes:next:node
+		var chr
+		var part
+
+		if mode == IM.WORD_START
+			var el = mid or lft
+			if lft?.matches(%imclose)
+				return lft.parent.region.start
+			elif lft?.matches(%imstr)
+				return lft.region.start
+			else
+				loc -= 1
+				while chr = @buffer[loc - 1]
+					if chr in [' ','\t','\n','.']
+						return loc
+					loc -= 1
+				return loc
+				# let loc = self.loc
+				# let buf = view.buffer
+				# console.log 'peekbehind',peekbehind,loc,str
+				# let str = peekbehind.split('').reverse().join('')
+				# loc -= str.match(/^([\s\t\.]*.+?|)(\b|$)/)[1][:length]
+				# self.loc = loc
+
+		elif mode == IM.WORD_END
+			var el = mid or rgt
+			if rgt?.matches(%imopen)
+				return rgt.parent.region.end
+			elif rgt?.matches(%imstr)
+				return rgt.region.end
+			else
+				while chr = @buffer[loc + 1]
+					if !chr or chr in [' ','\t','\n','.']
+						return loc + 1
+					loc += 1
+				return loc
+				# console.log 'peekahead',peekahead,loc
+				# loc += peekahead.match(/^([\s\.]*.+?|)(\b|$)/)[1][:length]
+				# loc++ until buf[loc].match(/[\n\]/)
+				# self.loc = loc
+
+		elif mode == IM.LINE_END
+			return loc
+			# self.set(row,1000)
+
+		elif mode == IM.LINE_START
+
+			return loc
+			# FIXME tabs-for-spaces
+			# let tabs = linestr.match(/^\t*/)[0][:length]
+			# let newcol = tabs * view.tabSize
+			# self.col = col > newcol ? newcol : 0
+
+		else
+			return loc

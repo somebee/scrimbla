@@ -15,7 +15,7 @@ export tag CaretView
 		console.log 'caretview'
 		# console.log 'hint at',object.row
 		let reg = object.region
-		
+
 		<self.CaretView>
 			<RangeView region=(reg) view=view>
 
@@ -436,6 +436,8 @@ tag imcaret
 		return nodes[0]:node
 
 	def insert text, edit
+		view.@mark.insert(text,edit)
+		return self
 
 		var sub = ''
 		view.history.mark('action')
@@ -479,6 +481,9 @@ tag imcaret
 
 
 	def erase mode
+		view.@mark.erase(mode)
+		return self
+		
 		view.history.mark('action')
 
 		if isCollapsed

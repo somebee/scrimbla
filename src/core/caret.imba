@@ -78,15 +78,21 @@ export class Caret
 		dirty
 
 	def move offset = 1, mode = 0
-		console.log 'move caret-mark',offset,mode,IM.CHAR
-
-		if mode == IM.CHAR
-			console.log 'move by a certain charcount'
-			# region.move(offset)
-			region.b += offset
-			region.collapseToHead if collapsed
-		# head.alter(mode,offset)
+		console.log 'move caret-mark',offset,mode
+		region.b += offset
+		region.collapseToHead if collapsed
 		return self
+
+	def alter offset = 1, mode = 0
+		if mode == IM.CHAR
+			move(offset)
+		else
+			var loc = buffer.offsetFromLoc(region.b,mode)
+			console.log 'altered to new',loc,'from',region.b
+			moveTo(loc)
+
+		@realCol = null
+		self
 
 	def moveTo loc
 		move(loc - region.b)
@@ -94,19 +100,21 @@ export class Caret
 	def moveUp
 		# first remember the current column
 		var curr = buffer.locToCell(region.b)
-		var cell = [curr[0] - 1,curr[1]]
+		@realCol ||= curr[1]
+		var cell = [curr[0] - 1,@realCol]
 		var loc = buffer.cellToLoc(cell)
-		console.log 'move down from',curr,cell,loc
-		move(loc - region.b) # simply move by that amount
+		console.log 'move down from',curr,cell,loc,@realCol
+		moveTo(loc) # simply move by that amount
 		self
 
 	def moveDown
 		# var cell = region.cell
 		var curr = buffer.locToCell(region.b)
-		var cell = [curr[0] + 1,curr[1]]
+		@realCol ||= curr[1]
+		var cell = [curr[0] + 1,@realCol]
 		console.log 'move down from',curr,cell
 		var loc = buffer.cellToLoc(cell)
-		move(loc - region.b) # simply move by that amount
+		moveTo(loc) # simply move by that amount
 		# first remember the current column
 		self
 
@@ -115,6 +123,55 @@ export class Caret
 
 	def collapseToEnd
 		region.collapseToEnd
+
+	def insert text, edit
+		var sub = ''
+		view.history.mark('action')
+
+		if !collapsed
+			let reg = region
+			if reg.size > 0
+				sub = reg.text
+				view.erase(reg)
+			collapseToStart
+
+		let move = 0
+		let sel
+
+		# need a different syntax for $0 -- can be in regular pasted code
+		# should have a separate command for insertSnippet probably.
+		if text.indexOf('$0') >= 0
+			sel = region.clone(0,sub:length).move(text.indexOf('$0'))
+			text = text.replace('$0',sub)
+
+		edit ||= {size: text:length}
+
+		# head.normalize
+
+		view.runCommand('Insert', region.start, text)
+
+		# var res = view.insert(region.start, text, edit)
+		view.log 'inserted -- now move',edit:size
+
+		if sel
+			region = sel
+			console.log "MARK SPECIAL MOVE"
+
+			# should trigger move(!)
+		return self
+
+	def erase mode
+		view.history.mark('action')
+
+		if collapsed
+			console.log 'isCollapsed',mode
+			collapsed = no
+			move(-1)
+
+		console.log 'erasing region',region
+		view.erase(region)
+		collapseToStart
+		return self
 
 	def node
 		@node ||= <caretview[self]>
