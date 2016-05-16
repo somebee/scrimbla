@@ -276,8 +276,11 @@ tag imview
 		if cmd:command isa Function
 			return cmd:command.apply(target or self,params)
 
-
 	def onkeydown e
+		trykeydown(e)
+		listeners.emit('AfterKeydown',[])
+
+	def trykeydown e
 		VIEW = self # hack
 		e.halt
 
@@ -354,6 +357,7 @@ tag imview
 
 		if ins != null
 			e.halt.cancel
+			console.log 'caret.insert directly?!'
 			caret.insert(ins)
 			return self
 		self
@@ -370,6 +374,7 @@ tag imview
 		e.@text = text
 		e.cancel
 		ontype(e)
+		# listeners.emit('Keypress',[])
 		self
 
 	def ontextinput e
@@ -411,6 +416,7 @@ tag imview
 				cmd.command(caret,self,ins,e)
 			else
 				caret.insert(ins) if ins
+			
 		catch e
 			log 'error from ontype'
 

@@ -1,4 +1,4 @@
-
+import './util' as util
 import Region from '../region'
 
 export class Buffer
@@ -43,8 +43,8 @@ export class Buffer
 		@buffer:length
 
 	# location to 
-	def loc-to-rc
-		self
+	def loc-to-rc loc
+		util.rowcol(self, loc)
 
 	def location
 		self

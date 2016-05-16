@@ -438,7 +438,9 @@ tag imcaret
 
 		head.normalize
 
-		view.runCommand 'Insert', region.start, text # Command.load('Insert',region.start,text)
+		let reg = region
+
+		view.runCommand('Insert', reg.start, text)
 
 		# var res = view.insert(region.start, text, edit)
 		view.log 'inserted -- now move',edit:size
@@ -446,12 +448,10 @@ tag imcaret
 		if sel
 			self.region = sel
 		else
-			# move locations
 			head.loc = head.loc + edit:size
-			# head.move(edit:size)
 
 		dirty
-
+		# view.listeners.emit('Action', [self])
 		return self
 
 
@@ -471,16 +471,6 @@ tag imcaret
 		collapseToStart
 		# log region
 		return self
-
-		var target = target(reg)
-		region = reg
-
-		view.edit(
-			text: ''
-			target: target
-			region: reg
-			caret: reg.clone.collapse(no)
-		)
 
 	def chToLen v
 		# return v + 'ch'
