@@ -6,18 +6,22 @@ import Command from '../core/command'
 
 import RangeView from './range'
 
-export tag CaretView
+export tag CaretView < RangeView
 	
 	def view
 		object.view
 
-	def render
-		console.log 'caretview'
-		# console.log 'hint at',object.row
-		let reg = object.region
+	def region
+		object.region
 
-		<self.CaretView>
-			<RangeView region=(reg) view=view>
+	def render
+		super
+		# console.log 'caretview'
+		# console.log 'hint at',object.row
+		# let reg = object.region
+		# 
+		# <self.CaretView>
+		# 	<RangeView region=(reg) view=view>
 
 
 tag caretview < CaretView
