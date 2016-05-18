@@ -64,8 +64,10 @@ export class Caret
 		self
 
 	def move offset = 1, mode = 0
+		return self if offset == 0
 		console.log 'move caret-mark',offset,mode
-		region.b += offset
+		var to = Math.max(Math.min(buffer.size,region.b + offset),0)
+		region.b = to
 		region.collapseToHead if collapsed
 		modified
 		return self
@@ -111,12 +113,18 @@ export class Caret
 
 	def collapseToStart
 		region.collapseToStart
+		collapsed = yes
+		self
+
 
 	def collapseToEnd
 		region.collapseToEnd
+		collapsed = yes
+		self
 
 	def expandToLines
 		console.log 'caret expandToLines'
+		collapsed = no
 		region.a = buffer.offsetFromLoc(region.a,IM.LINE_START)
 		region.b = buffer.offsetFromLoc(region.b,IM.LINE_END)
 		self
@@ -139,9 +147,7 @@ export class Caret
 				view.erase(reg)
 			collapseToStart
 
-		let move = 0
 		let sel
-
 		# need a different syntax for $0 -- can be in regular pasted code
 		# should have a separate command for insertSnippet probably.
 		if text.indexOf('$0') >= 0
@@ -150,18 +156,11 @@ export class Caret
 
 		edit ||= {size: text:length}
 
-		# head.normalize
-
 		view.runCommand('Insert', region.start, text)
-
-		# var res = view.insert(region.start, text, edit)
-		view.log 'inserted -- now move',edit:size
 
 		if sel
 			region = sel
-			console.log "MARK SPECIAL MOVE"
-
-			# should trigger move(!)
+			modified
 		return self
 
 	def erase mode
@@ -169,13 +168,14 @@ export class Caret
 		view.history.mark('action')
 
 		if region.size == 0 # collapsed
-			console.log 'isCollapsed',mode
-			collapsed = no
-			move(-1)
+			console.log 'isCollapsed',mode			
+			view.erase(region.clone.expand(-1,0))
+			return self
 
 		console.log 'erasing region',region
+
 		view.erase(region)
-		collapseToStart
+		collapseToStart # should happen be default through adjust no?
 		return self
 
 	def dirty
@@ -184,11 +184,13 @@ export class Caret
 	def text
 		region.text
 
-	def peekbehind
-		buffer.substringBeforeLoc(region.start)
+	def peekbehind reg
+		var str = buffer.substringBeforeLoc(region.start)
+		reg isa RegExp ? str.match(reg) : str
 
-	def peekahead
-		buffer.substringAfterLoc(region.end)
+	def peekahead reg
+		var str = buffer.substringAfterLoc(region.end)
+		reg isa RegExp ? str.match(reg) : str
 
 	def indent
 		var str = buffer.linestringForLoc(region.start)
@@ -200,6 +202,14 @@ export class Caret
 
 	def node
 		@node ||= <caretview[self]>
+
+	def unblink force
+		@node.unblink(force) if @node
+		self
+
+	def blink force
+		@node.blink(force) if @node
+		self
 
 export class RemoteCaret < Caret
 	

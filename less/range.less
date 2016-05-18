@@ -19,10 +19,64 @@
 	.part {
 		position: absolute;
 		outline: 1px solid #EFB075;
-		min-height: 1;
+		// min-height: 1;
+		height: 100%;
+	}
+
+	.loc {
+		position: absolute;
+		// outline: 1px solid blue;
+		height: 100%;
+
+		.mark {
+			@size: 3px;
+			width: (@size * 2 + 1);
+			height: 100%;
+			border: @size solid transparent;
+			border-top: @size solid #FFFB60;
+			background: transparent !important;
+			box-sizing: border-box;
+			margin-left: -(@size + 1);
+			position: absolute;
+		}
+
+		.vbar {
+			position: absolute;
+			top: 5px;
+			bottom: 1px;
+			background: rgba(255, 251, 96, 0.5);
+			width: 1px;
+			left: -1px;
+		}
+
+		&.a {
+			display: none;
+		}
+
+	}
+
+	&.blink .loc {
+		opacity: 0.1;
+	}
+
+	&.collapsed .loc.a { display: none; }
+	// &:not(.remote) { display: none; }
+
+	&.remote {
+		.loc {
+			.mark { border-top-color: #60CCFF; }
+			.vbar { background: #60CCFF; }
+		}
 	}
 }
 
 ._imcaret {
 	display: none;
+}
+
+._caretview {
+	display: none;
+	&.active {
+		display: block;
+	}
 }

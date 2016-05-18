@@ -14,8 +14,20 @@ export tag CaretView < RangeView
 	def region
 		object.region
 
+	def unblink force = no
+		if force
+			log 'CaretView unblink!'
+
+		unflag('blink')
+		self
+
+	def blink
+		flag('blink')
+		self
+
 	def render
 		super
+		flag('active',object.active)
 		# console.log 'caretview'
 		# console.log 'hint at',object.row
 		# let reg = object.region

@@ -4,7 +4,7 @@ Bridge for communicating with the Imba compiler in a worker
 ###
 export class ImbacWorker
 		
-	def initialize path = "/imbac.worker.js"
+	def initialize path = "/scrimbla.worker.js"
 		@path = path
 		@callbacks = []
 		self

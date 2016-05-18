@@ -87,11 +87,8 @@ tag imview
 
 		@carets = Carets.new(self)
 		@carets.add(@mark = @caret = Caret.new(self))
-		# <imcaret.caret.local view=self>
-
 		# custom temporary
 		@marks = Carets.new(self)
-		# @marks.add(@mark = Caret.new(self))		
 
 		@listeners = ListenerManager.new(self)
 		@hints     = Hints.new(self)
@@ -100,10 +97,6 @@ tag imview
 		@shortcuts = ShortcutManager.new(self)
 		render
 		@observer  = Observer.new(self)
-
-		# @caret.region = Region.new(0,0,root,self)
-
-		
 
 		# bind to mousemove of dom?
 		dom.addEventListener('mouseover') do |e| Imba.Events.delegate(e)
@@ -179,7 +172,9 @@ tag imview
 
 	def body
 		<imviewbody@body>
-			carets.map(|caret| caret.node.end)
+			<.markers>
+				<.dim> '|'
+				carets.map(|caret| caret.node.end)
 			# @marks.map(|mark| mark.node.end)
 			<imroot@root.imba view=self>
 
@@ -534,17 +529,12 @@ tag imview
 		# @mark.collapsed = no
 		localCaret.moveTo(@buffer.cellToLoc([r,c]))
 		localCaret.collapsed = no
-
-		# caret.selectable
-		# caret.head.set(r,c).normalize
-		# caret.dirty
 		self
 
 	def ontouchend touch
 		return unless touch.button == 0
 		var [r,c] = rcForTouch(touch)
 
-		# @mark.collapsed = no
 		localCaret.moveTo(@buffer.cellToLoc([r,c]))
 		if localCaret.region.size == 0
 			console.log 'collapsed!'
@@ -772,6 +762,7 @@ tag imview
 	def annotate
 		var state = root.codeState
 		var code = state:code
+		console.log 'annotating'
 
 		var apply = do |meta|
 			var vars = []
