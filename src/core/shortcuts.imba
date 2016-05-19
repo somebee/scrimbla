@@ -126,49 +126,22 @@ IM.KeyBindings = [
 			sel.text.indexOf('\n') >= 0
 
 		command: do |sel|
-			# sel.expandToLines
-			# sel.@node.render
-			# return self
-			var region = sel.region.clone.expandToLines
+			var region = sel.region.clone.expandToLines.expand(-1,0)
 			var points = region.find('\n').reverse
-			console.log "found at points",points
-			points.push(region.start - 1) # there is a tab at first pos
 			points.map do |pos|
 				console.log 'found newline at pos',pos
 				sel.view.insert(pos + 1,'\t')
-				# when we insert the matches will change
-				
 			return yes
-
-			var nodes = sel.view.nodesInRegion(region)
-
-			# loop through the selection to to find the newlines
-
-			nodes.map do |match|
-				# should use buffer directly - no nodes
-				if match:node.matches('._imnewline')
-					console.log 'found tab in selection',match
-					unless match:mode == 'start'
-						match:node.indent
-			# sel.dirty
-
 
 
 	combo ["shift+tab"]
 		context: do |sel|
-			sel.text.indexOf('\n') >= 0
+			yes
+			# sel.text.indexOf('\n') >= 0
 		command: do |sel|
 			var region = sel.region.clone.expandToLines.expand(-1,0)
 			var points = region.find("\n\t").reverse
 			points.map do |pos| sel.view.erase([pos + 1,pos + 2])
-
-
-	combo ["shift+tab"]
-		context: do |e|
-			return true # String(e.view.selection).indexOf('\n') >= 0
-		command: do |sel|
-			console.log 'try undent'
-			return true
 
 	combo ["alt+shift+return"] do |sel| console.log 'prettify'
 
@@ -186,14 +159,21 @@ IM.KeyBindings = [
 		context: do |sel,o|
 			let reg = sel.region
 			if reg.size == 0
-				console.log  'region selection?!? backspace??'
-				if o:node = reg.prevNode('._impair,._imstr')
-					console.log 'found node?!',o:node
-					return yes
+				if reg.peek(-1,0) in [']',')','}']
+					var start = util.findPairStart(reg.buffer.raw,reg.start - 1)
+					console.log 'the start of the pair is',start
+					if start >= 0
+						o:region = [reg.start,start]
+						return yes
+
+				# console.log  'region selection?!? backspace??'
+				# if o:node = reg.prevNode('._impair,._imstr')
+				#	console.log 'found node?!',o:node
+				#	return yes
 
 		command: do |sel,o|
 			# not sure about this one
-			sel.region = o:node.region.clone.reverse
+			sel.set(o:region)
 	
 	combo ["backspace"]
 		context: do |sel,o|

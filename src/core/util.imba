@@ -39,7 +39,7 @@ export def normalizeNewlines str
 		return str.replace(/\r\n/g,'\n')
 	return str
 
-export def stringIsBalanced str
+export def stringIsBalanced str, i = 0
 	var opens = '[{("\''
 	var closes = ']})"\''
 	var stack = []
@@ -56,6 +56,50 @@ export def stringIsBalanced str
 			stack.push(end = closes[oid])
 
 	return stack:length == 0 ? true : false
+
+BBALANCED = do |str,loc|
+	var opens = '[{("\''
+	var closes = ']})"\''
+	var stack = []
+	var pairs = []
+	var i = loc
+	var s,end
+
+	while s = str[i--]
+		var oid = closes.indexOf(s)
+
+		if s == end
+			stack.pop
+			end = stack[stack:length - 1]
+			if stack:length == 0
+				return i + 1
+
+		elif oid >= 0
+			stack.push(end = opens[oid])
+
+	return stack:length == 0 ? true : false
+
+export def findPairStart str, loc
+	var opens = '[{("\''
+	var closes = ']})"\''
+	var stack = []
+	var pairs = []
+	var i = loc
+	var s,end
+
+	while s = str[i--]
+		var oid = closes.indexOf(s)
+
+		if s == end
+			stack.pop
+			end = stack[stack:length - 1]
+			if stack:length == 0
+				return i + 1
+
+		elif oid >= 0
+			stack.push(end = opens[oid])
+
+	return -1
 
 export def colToLoc line, col, tabsize = 4
 	var ci = 0

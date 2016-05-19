@@ -57,6 +57,7 @@ tag imview
 	prop listeners
 	prop worker
 	prop input
+	prop editable default: yes
 
 	def highlighter
 		Highlighter
@@ -188,7 +189,7 @@ tag imview
 		<scrimbla-overlays@overlays view=self>
 
 	def render
-		<self .readonly=isReadOnly>
+		<self .readonly=isReadOnly .editable=(editable)>
 			<@seltext> "x"
 			<imdims@dims> "x"
 			header
@@ -282,6 +283,10 @@ tag imview
 			return cmd:command.apply(target or self,params)
 
 	def onkeydown e
+		if !editable
+			e.cancel
+			return
+
 		trykeydown(e)
 		listeners.emit('AfterKeydown',[])
 
@@ -765,6 +770,7 @@ tag imview
 		console.log 'annotating'
 
 		var apply = do |meta|
+			ANNO = @annotations = meta
 			var vars = []
 			for scope in meta:scopes
 				for v in scope:vars
@@ -808,6 +814,7 @@ tag imview
 						let el = tag(dom)
 						if el and el:setEref
 							el.eref = eref
+							el.setFlag('vartype',"{variable:type}ref")
 						# tag(dom).eref = eref
 			return
 

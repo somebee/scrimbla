@@ -20,6 +20,9 @@ export class Buffer
 		@lines = null
 		self
 
+	def raw
+		@buffer
+
 	def refresh
 		set view.root.code
 

@@ -429,6 +429,8 @@ tag im < b
 			e.handled if e
 			Highlighter.reparse(dirty)
 
+tag imindex < im
+	type 'index'
 
 # piece of unparsed code
 tag imraw < im

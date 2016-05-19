@@ -31,6 +31,7 @@ tag imtok < im
 
 	def clearVarRef
 		eref = null
+		setFlag('vartype',null)
 		self
 
 	def clone val

@@ -51,6 +51,7 @@ var classes = {
 	'{{': '_imopen'
 	'}}': '_imclose'
 
+	'index': '_imindex'
 	'"': 'doublequote'
 	"'": 'singlequote'
 
@@ -101,7 +102,7 @@ var OPEN = {
 	'call_start': '_imparens call'
 	'selector_start': '_imsel selector'
 	'string_start': '_imistring'
-	'index_start': 'index'
+	'index_start': '_imindex'
 	'block_param_start': '_impair _imblockparams'
 	# 'indent': '_indent'
 	'(': '_imparens paren'
@@ -118,7 +119,7 @@ var CLOSE = {
 	'call_end': '_imparens call'
 	'string_end': '_imistring'
 	'selector_end': 'sel'
-	'index_end': 'index'
+	'index_end': '_imindex'
 	'block_param_end': '_impair _imblockparams'
 	'}}': '_imiexpr'
 	')': 'paren'

@@ -28,6 +28,7 @@ export class Caret
 	def set region
 		console.log 'Caret.set',region
 		self.region = Region.normalize(region,view)
+		collapsed = no if self.region.size > 0
 		unblink(yes)
 		self
 
@@ -64,12 +65,15 @@ export class Caret
 		# tail = head.clone if tail == head
 		self
 
+	def collapsed
+		@collapsed and region.size == 0
+
 	def move offset = 1, mode = 0
 		return self if offset == 0
 		console.log 'move caret-mark',offset,mode
 		var to = Math.max(Math.min(buffer.size,region.b + offset),0)
 		region.b = to
-		region.collapseToHead if collapsed
+		region.collapseToHead if @collapsed # confusing
 		modified
 		unblink(yes)
 		return self
