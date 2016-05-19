@@ -14,7 +14,6 @@ export tag LocView
 		@dom:style:left = val
 
 	def build
-		self
 		<self>
 			<.mark>
 			<.vbar>
@@ -81,7 +80,6 @@ export tag RangeView
 		calculate
 
 		<self.RangeView .collapsed=(region.size == 0)>
-			<@dim> "|"
 			if region.size > 0
 				ranges
 			<LocView.loc.a view=view row=(@a[0] - row) col=(@a[1])>

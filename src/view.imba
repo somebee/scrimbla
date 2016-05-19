@@ -27,16 +27,6 @@ import './core/util' as util
 import CaretView from './views/caret'
 require './views/overlays'
 
-tag imdims
-
-	def ch
-		# uncache
-		if @ow != dom:offsetWidth
-			@ow = dom:offsetWidth
-			@ch = null
-
-		@ch ||= dom.getBoundingClientRect:width
-
 tag imviewbody
 
 tag imview
@@ -62,11 +52,13 @@ tag imview
 	def highlighter
 		Highlighter
 
-	def lineHeight
-		@dims.dom:offsetHeight
-
-	def charWidth
-		@dims.ch
+	#	def lineHeight
+	#		@origo.dom:offsetHeight
+	#		# @dims.dom:offsetHeight
+	#
+	#	def charWidth
+	#		@origo.dom:offsetWidth
+	#		# @dims.ch
 
 	def isReadOnly
 		history.mode == 'play'
@@ -174,7 +166,7 @@ tag imview
 	def body
 		<imviewbody@body>
 			<.markers>
-				<.dim> '|'
+				<@origo> '|'
 				carets.map(|caret| caret.node.end)
 			# @marks.map(|mark| mark.node.end)
 			<imroot@root.imba view=self>
@@ -191,7 +183,6 @@ tag imview
 	def render
 		<self .readonly=isReadOnly .editable=(editable)>
 			<@seltext> "x"
-			<imdims@dims> "x"
 			header
 			body
 			footer
@@ -283,6 +274,10 @@ tag imview
 			return cmd:command.apply(target or self,params)
 
 	def onkeydown e
+		if e.keycombo == 'esc'
+			# pass through
+			return
+
 		if !editable
 			e.cancel
 			return
@@ -292,7 +287,7 @@ tag imview
 
 	def trykeydown e
 		VIEW = self # hack
-		e.halt
+		
 
 		var combo = shortcuts.keysForEvent(e.event)
 		var action = shortcuts.getShortcut(e)
@@ -305,6 +300,7 @@ tag imview
 		# log 'imview keydown',combo
 
 		if action
+			e.halt
 			# console.log 'action here?!',action
 			e.cancel if execAction(action,e)
 			return
@@ -312,6 +308,7 @@ tag imview
 		# move these into commands as well
 		# thisshould move this into commands instead
 		if let arr = combo.match(/\b(left|right|up|down)/)
+			e.halt
 			hints.activate
 
 			@mark.collapsed = !shift
@@ -489,7 +486,7 @@ tag imview
 		return
 
 	def ontouchstart touch
-		@rect = @body.dom.getBoundingClientRect
+		@cellbox = @origo.dom.getBoundingClientRect
 
 		return unless touch.button == 0
 
@@ -499,33 +496,23 @@ tag imview
 
 		var e = touch.event
 		e.preventDefault
-		# see if shift is down? should change behaviour
 		var shift = e:shiftKey
-		# log 'ontouchstart',touch,touch.x,touch.y,e,touch.button
-		# var [r,c] = rcForTouch(touch)
-
-		# if shift
-		# 	caret.selectable
-		# else
-		# 	caret.collapse
-
 		@mark.collapsed = !shift
-
-		# caret.head.set(r,c).normalize
-		# caret.dirty
-		# console.log 'touch start refocus?'
 		dom.focus
 		self
 
 	def xyToRowCol x,y
-		var col = Math.max(Math.round(x / charWidth),0)
-		var row = Math.max(Math.ceil(y / lineHeight),1)
+		var box = @cellbox
+
+		x = Math.max(x - box:left,0)
+		y = Math.max(y - box:top,0)
+
+		var col = Math.max(Math.round(x / box:width),0)
+		var row = Math.max(Math.ceil(y / box:height),1)
 		return [row - 1,col]
 
 	def rcForTouch touch
-		var x = Math.max(touch.x - @rect:left,0)
-		var y = Math.max(touch.y - @rect:top,0)
-		return xyToRowCol(x,y)
+		return xyToRowCol(touch.x,touch.y)
 
 	def ontouchupdate touch
 		return unless touch.button == 0
@@ -545,9 +532,6 @@ tag imview
 			console.log 'collapsed!'
 			localCaret.collapsed = yes
 
-		# caret.head.set(r,c).normalize
-		# caret.dirty 
-		# caret.blink # only if editor is active?
 		self
 
 	def erase reg, edit

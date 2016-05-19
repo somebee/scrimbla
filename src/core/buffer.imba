@@ -137,14 +137,14 @@ export class Buffer
 		if mode == IM.WORD_START
 			loc -= 1
 			while chr = @buffer[loc - 1]
-				if chr in [' ','\t','\n','.']
+				if chr in [' ','\t','\n','.','"',"'",'[']
 					return loc
 				loc -= 1
 			return loc
 
 		elif mode == IM.WORD_END
 			while chr = @buffer[loc + 1]
-				if !chr or chr in [' ','\t','\n','.']
+				if !chr or chr in [' ','\t','\n','.','"',"'"]
 					return loc + 1
 				loc += 1
 			return loc
