@@ -19,10 +19,13 @@ export tag CaretView < RangeView
 			log 'CaretView unblink!'
 
 		unflag('blink')
+		@unblinked = Date.now
+		render
 		self
 
 	def blink
-		flag('blink')
+		unless (Date.now - @unblinked) < 100
+			flag('blink')
 		self
 
 	def render

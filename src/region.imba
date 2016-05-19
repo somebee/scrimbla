@@ -49,15 +49,21 @@ export class Region
 			start <= rel and end >= rel
 
 	def adjust rel, add = yes
+		var inside = start <= rel.start and end >= rel.end
 		if add
 			if rel.start <= start
 				move(rel.size)
+			# is inside
+			elif inside
+				expand(0,rel.size)
 		else
 			if equals(rel)
 				# console.log "ADJUST EQUALS!!!",rel,self
 				collapseToStart
 			elif rel.end <= start
 				move(-rel.size)
+			elif inside
+				expand(0,-rel.size)
 
 		self
 
@@ -153,6 +159,22 @@ export class Region
 	def nodes includeEnds = yes
 		view.nodesInRegion(self,includeEnds)
 
+	def find query, cb
+		var from = start
+		var to = end
+		var buf = buffer.toString
+		var matches = []
+
+		if query isa String
+			var m
+			while (m = buf.indexOf(query,from)) >= 0
+				if m >= to
+					break
+				cb(m) if cb
+				matches.push(m)
+				from = m + 1
+		return matches
+
 	def prevNode query
 		var nodes = nodes(no)
 		var node = nodes:lft
@@ -185,32 +207,41 @@ export class Region
 		return node
 
 	def buffer
-		@root.code
+		view.@buffer
+
+	def expandToLines
+		if reversed
+			a = buffer.offsetFromLoc(a,IM.LINE_END)
+			b = buffer.offsetFromLoc(b,IM.LINE_START)
+		else
+			a = buffer.offsetFromLoc(a,IM.LINE_START)
+			b = buffer.offsetFromLoc(b,IM.LINE_END)
+		self
 
 	def startAtLine
 		normalize
-		var buffer = buffer
+		var buf = buffer.toString
 		var a = start
 
-		if buffer[a] == '\n' and size == 0
+		if buf[a] == '\n' and size == 0
 			a-- # if we are at the end of a line
 
-		while a >= 0 and buffer[a] != '\n'
+		while a >= 0 and buf[a] != '\n'
 			a--
 		@a = a
 		self
 
 	def endAtLine
 		normalize
-		var buffer = buffer
+		var buf = buffer.toString
 		var b = (end - 1)
-		while b >= 0 and buffer[b] and buffer[b] != '\n'
+		while b >= 0 and buf[b] and buf[b] != '\n'
 			b++
 		@b = b
 		self
 
 	def cell
-		view.@buffer.locToCell(start)
+		buffer.locToCell(start)
 
 	def row
 		cell[0]
@@ -218,11 +249,14 @@ export class Region
 	def col
 		cell[1]
 
+	# what ? should use the actual buffer instead
 	def peekbehind len = 1
-		len == 1 ? buffer[start - 1] : buffer.substring(start - len,start)
+		var buf = buffer.toString
+		len == 1 ? buf[start - 1] : buf.substring(start - len,start)
 
 	def peekahead len = 1
-		len == 1 ? buffer[end] : buffer.substr(end,len)
+		var buf = buffer.toString
+		len == 1 ? buf[end] : buf.substr(end,len)
 
 	def indent
 		clone.startAtLine.text.match(/^\n?(\t*)/)[1]

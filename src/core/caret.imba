@@ -28,6 +28,7 @@ export class Caret
 	def set region
 		console.log 'Caret.set',region
 		self.region = Region.normalize(region,view)
+		unblink(yes)
 		self
 
 	def destroy
@@ -70,6 +71,7 @@ export class Caret
 		region.b = to
 		region.collapseToHead if collapsed
 		modified
+		unblink(yes)
 		return self
 
 	def expand a = 0, b = 0
@@ -125,8 +127,7 @@ export class Caret
 	def expandToLines
 		console.log 'caret expandToLines'
 		collapsed = no
-		region.a = buffer.offsetFromLoc(region.a,IM.LINE_START)
-		region.b = buffer.offsetFromLoc(region.b,IM.LINE_END)
+		region.expandToLines
 		self
 
 	def selectAll
@@ -139,6 +140,7 @@ export class Caret
 	def insert text, edit
 		var sub = ''
 		view.history.mark('action')
+		unblink(yes)
 
 		if !collapsed
 			let reg = region
@@ -165,6 +167,7 @@ export class Caret
 
 	def erase mode
 		console.log 'erase!!'
+		unblink(yes)
 		view.history.mark('action')
 
 		if region.size == 0 # collapsed

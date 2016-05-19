@@ -780,7 +780,8 @@ tag imview
 			for warn in warnings
 				warn:type ||= 'error'
 				warn:group = 'analysis'
-				hints.add(warn).activate
+				# dont show errors
+				# hints.add(warn).activate
 
 			WARNS = warnings
 
