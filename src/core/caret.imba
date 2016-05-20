@@ -175,8 +175,13 @@ export class Caret
 		view.history.mark('action')
 
 		if region.size == 0 # collapsed
-			console.log 'isCollapsed',mode			
-			view.erase(region.clone.expand(-1,0))
+			console.log 'isCollapsed',mode
+			let reg = region.clone
+			if mode
+				reg.a = buffer.offsetFromLoc(reg.a,mode)
+			else
+				reg.expand(-1,0)
+			view.erase(reg)
 			return self
 
 		console.log 'erasing region',region

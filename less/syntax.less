@@ -203,6 +203,19 @@
 		color: @err;
 		background: fade(@err,20%);
 	}
+
+	.show-tabs ._imtab {
+		position: relative;
+		&:before {
+			content: "-";
+			color: transparent;
+			position: absolute;
+			top: 50%;
+			left: 2px;
+			right: 2px;
+			border-top: 1px solid fade(white,5%);
+		}
+	}
 }
 
 .dark-syntax () {
