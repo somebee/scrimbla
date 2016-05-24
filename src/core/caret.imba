@@ -9,27 +9,32 @@ export class Caret
 	prop region
 	prop collapsed
 	prop active
+	prop color
+	prop session
 	# remember column
 
 	def buffer
 		view.@buffer
 
-	def initialize view
+	def initialize view, options = {}
 		@view = view # should rather be for buffer, no?
 		@region = Region.new(0,0,view.root,view)
 		@collapsed = yes
+		@options = options
+		color = @options:color
 		self
 
 	def adjust rel, ins = yes
-		console.log 'adjust',rel.a,rel.b,region.a,region.b,ins,rel.size
+		# console.log 'adjust',rel.a,rel.b,region.a,region.b,ins,rel.size,region.size
 		region.adjust(rel,ins)
 		self
 
-	def set region
-		console.log 'Caret.set',region
+	def set region, broadcast = no
+		# console.log 'Caret.set',region
 		self.region = Region.normalize(region,view)
 		collapsed = no if self.region.size > 0
 		unblink(yes)
+		modified if broadcast
 		self
 
 	def destroy
@@ -213,7 +218,7 @@ export class Caret
 		self
 
 	def node
-		@node ||= <caretview[self]>
+		@node ||= <caretview[self].caret>
 
 	def unblink force
 		@node.unblink(force) if @node
@@ -226,7 +231,7 @@ export class Caret
 export class RemoteCaret < Caret
 	
 	def node
-		@node ||= <caretview[self].remote>
+		@node ||= <caretview[self].remote.caret>
 
 export class Carets < List
 

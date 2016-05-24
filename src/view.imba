@@ -343,6 +343,7 @@ tag imview
 			elif !shift and @mark.region.size > 0
 				# this basically collapses the marker
 				dir > 0 ? @mark.collapseToEnd : @mark.collapseToStart
+				@mark.modified
 				# caret.head.set(dir > 0 ? ends[1] : ends[0])
 				# caret.dirty # should not need to call this all the time
 				return e.cancel
@@ -535,7 +536,7 @@ tag imview
 		self
 
 	def erase reg, edit
-		reg = Region.normalize(reg,self)
+		reg = Region.normalize(reg,self).clone
 
 		var text = reg.text
 		history.onerase(reg,text,edit)

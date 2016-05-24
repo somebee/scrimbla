@@ -7,7 +7,7 @@ tag iminsert < im
 		yes
 
 	def insert reg, ins
-		console.log 'insert code into iminsert!!',ins,reg
+		# console.log 'insert code into iminsert!!',ins,reg
 
 		if ins isa IM.Types:fragment
 			ins = ins.code
@@ -23,8 +23,7 @@ tag iminsert < im
 		code.match(/^[\n\t\ ]+$/)
 
 	def mutated
-		log 'iminsert mutated'
-
+		# log 'iminsert mutated'
 		var dirty = dirtyExtent
 		view.highlighter.reparse(dirty)
 		self

@@ -124,7 +124,7 @@ tag im < b
 		util
 
 	def select
-		view.caret.set(region)
+		view.localCaret.set(region,yes)
 
 	def canPrepend text
 		no

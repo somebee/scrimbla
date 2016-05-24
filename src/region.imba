@@ -61,6 +61,7 @@ export class Region
 				# console.log "ADJUST EQUALS!!!",rel,self
 				collapseToStart
 			elif rel.end <= start
+				console.log 'relative end is before own start'
 				move(-rel.size)
 			elif inside
 				expand(0,-rel.size)
