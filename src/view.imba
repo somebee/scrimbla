@@ -274,6 +274,10 @@ tag imview
 			return cmd:command.apply(target or self,params)
 
 	def onkeydown e
+
+		var combo = shortcuts.keysForEvent(e.event)
+		e.data = view: self, combo: combo
+
 		if e.keycombo == 'esc'
 			# pass through
 			return
@@ -372,6 +376,8 @@ tag imview
 			console.log 'caret.insert directly?!'
 			localCaret.insert(ins)
 			return self
+
+		# trigger('scrimbla:keycombo',combo)
 		self
 
 	def localCaret

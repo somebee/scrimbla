@@ -127,12 +127,13 @@ export class Buffer
 		@buffer or ''
 
 	# analysis should happen in the buffer, not in the view?
-
-	def offsetFromLoc loc, mode
+	# hack - should introduce IM.INDENT_START instead
+	def offsetFromLoc loc, mode, indented = yes
 		# should be able to do this without using views
 		# should instead iterate with pairings etc
 		var chr
 		var part
+		var initial = loc
 
 		if mode == IM.WORD_START
 			loc -= 1
@@ -157,22 +158,33 @@ export class Buffer
 			# self.set(row,1000)
 
 		elif mode == IM.LINE_START
+			var start = 0
 			while chr = @buffer[loc - 1]
-				return loc if chr == '\n'
+				if chr == '\n'
+					start = loc
+					break
 				loc--
+
+			if indented
+				# find first non-indented
+				while @buffer[loc] == '\t'
+					loc++
+
+				if loc == initial
+					return start
 
 			return loc
 
 		return loc
 
 	def linestringForLoc loc
-		var a = offsetFromLoc(loc,IM.LINE_START)
+		var a = offsetFromLoc(loc,IM.LINE_START,no)
 		var b = offsetFromLoc(loc,IM.LINE_END)
 		return @buffer.substr(a,b - a)
 
 
 	def substringBeforeLoc loc
-		var a = offsetFromLoc(loc,IM.LINE_START)
+		var a = offsetFromLoc(loc,IM.LINE_START,no)
 		return @buffer.substr(a,loc - a)
 
 	def substringAfterLoc loc
