@@ -64,6 +64,9 @@ export class Caret
 	def isReversed
 		region.reversed
 
+	def size
+		region.size
+
 	def decollapse
 		# just a friendly flag to say that the caret
 		collapsed = no

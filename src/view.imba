@@ -390,8 +390,14 @@ tag imview
 
 		e.halt
 
-		var text = String.fromCharCode(e.event:charCode)
-		console.log 'keypress',text
+		var charCode = e.event:charCode
+
+		if charCode <= 31 or charCode == 127
+			console.log 'invalid charcode'
+			return
+
+		var text = String.fromCharCode(charCode)
+		# console.log 'keypress',text
 		e.@text = text
 		e.cancel
 		ontype(e)
@@ -399,9 +405,9 @@ tag imview
 		self
 
 	def ontextinput e
-		e.halt.cancel
 		e.@text = e.event:data
-		console.log 'textinput',e.@text
+		console.log 'textinput',e.event:data
+		e.halt.cancel
 		ontype(e)
 		self
 
@@ -410,6 +416,7 @@ tag imview
 		self
 
 	def oninput e
+		console.log 'oninput',e
 		e.halt
 		self
 
@@ -474,6 +481,9 @@ tag imview
 		log 'onpaste',e
 		var data = e.event:clipboardData
 		var text = data.getData('text/plain')
+
+		# clean text to paste
+		text = text.replace(/[\x00-\x1F\x7F-\x9F]/g, "")
 		e.halt.cancel
 		localCaret.insert(text)
 		refocus

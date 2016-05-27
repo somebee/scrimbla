@@ -183,9 +183,13 @@ IM.KeyBindings = [
 			yes # noop
 
 	combo ["backspace"] do |sel| sel.erase
+
 	combo ["shift+backspace"] do |sel| sel.erase
 	combo ["alt+backspace"] do |sel| sel.erase(IM.WORD_START)
 	combo ["super+backspace"] do |sel| sel.erase(IM.LINE_START)
+
+	combo ["del"] do |sel|
+		sel.size > 0 ? sel.erase : sel.expand(0,1).erase
 	
 	combo ["return",'shift+return','super+return'] do |sel|
 		var ind = sel.indent
