@@ -137,7 +137,6 @@ IM.KeyBindings = [
 	combo ["shift+tab"]
 		context: do |sel|
 			yes
-			# sel.text.indexOf('\n') >= 0
 		command: do |sel|
 			var region = sel.region.clone.expandToLines.expand(-1,0)
 			var points = region.find("\n\t").reverse
