@@ -213,9 +213,9 @@ export class Region
 	def expandToLines
 		if reversed
 			a = buffer.offsetFromLoc(a,IM.LINE_END)
-			b = buffer.offsetFromLoc(b,IM.LINE_START)
+			b = buffer.offsetFromLoc(b,IM.LINE_START,no)
 		else
-			a = buffer.offsetFromLoc(a,IM.LINE_START)
+			a = buffer.offsetFromLoc(a,IM.LINE_START,no)
 			b = buffer.offsetFromLoc(b,IM.LINE_END)
 		self
 

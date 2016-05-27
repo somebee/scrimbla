@@ -478,19 +478,15 @@ tag imview
 		log 'onbeforepaste',e
 
 	def onpaste e
-		log 'onpaste',e
+		# log 'onpaste',e
 		var data = e.event:clipboardData
 		var text = data.getData('text/plain')
-
-		# clean text to paste
-		text = text.replace(/[\x00-\x1F\x7F-\x9F]/g, "")
 		e.halt.cancel
-		localCaret.insert(text)
+		localCaret.paste(text)
 		refocus
 		repair
 
 	def refresh
-		# localCaret.render
 		self
 
 	def exec o

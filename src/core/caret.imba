@@ -198,6 +198,14 @@ export class Caret
 		collapseToStart # should happen be default through adjust no?
 		return self
 
+	def paste text
+		# remove invisible characters
+		text = text.replace(/[\u200B-\u200D\uFEFF\x7F]/g, "")
+		text = util.cleanIndent(text)
+		# automatically reindent - should be possible to opt out
+		text = util.reindent(text,indent,1)
+		insert(text)
+
 	def dirty
 		self
 
@@ -213,6 +221,7 @@ export class Caret
 		reg isa RegExp ? str.match(reg) : str
 
 	def indent
+		# TODO support other than tab-indent?
 		var str = buffer.linestringForLoc(region.start)
 		var ind = str.match(/^(\t*)/)[0]
 		return ind

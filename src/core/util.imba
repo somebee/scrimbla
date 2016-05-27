@@ -182,10 +182,89 @@ export def rowcol buf, loc, tabsize = 4
 
 	return [line,col]
 
+
 export def increaseIndent str
 	var reg = /^(\s*(.*\=\s*)?(export |global |extend )?(class|def|tag|unless|if|else|elif|switch|try|catch|finally|for|while|until|do))/
 	var other = /\b(do)\b/
 	reg.test(str) or other.test(str)
+
+
+export def findIndent str
+	for line in str.split('\n')
+		if var m = line.match(/^[\ \t]+/)
+			return m[0]
+	return ""
+
+
+export def normalizeIndent str, indent='\t'
+	return str unless indent
+
+	var m
+	var reg = /\n+([^\n\S]*)/g
+	var ind = null
+
+	var lines = str.split('\n')
+	var min = null
+	var il = indent:length
+
+	for ln,i in lines
+		let lnIndent = ''
+		let pos = 0
+		continue if ln == ''
+
+		while (il == 1 ? ln[pos] : ln.substr(pos,il)) == indent
+			lnIndent += indent
+			pos += il
+
+		if min == null or min:length > lnIndent:length
+			min = lnIndent
+
+	# now remove from lines
+	if min and min:length > 0
+		for ln,i in lines
+			lines[i] = ln.substr(min:length)
+		return lines.join('\n')
+
+	return str
+
+
+export def changeIndent str, prevIndent, indent='\t'
+	if prevIndent and prevIndent != indent
+		var lines = str.split('\n')
+		var min = null
+		var pil = prevIndent:length
+
+		for ln,i in lines
+			let pos = 0
+			let to = ''
+
+			while (pil == 1 ? ln[pos] : ln.substr(pos,pil)) == prevIndent
+				to += indent
+				pos += pil
+
+			if pos > 0
+				lines[i] = to + ln.substr(pos)
+		return lines.join('\n')
+	return str
+
+
+export def cleanIndent str, indent = '\t'
+	var prevIndent = findIndent(str)
+	str = normalizeIndent(str,prevIndent)
+	str = changeIndent(str,prevIndent,indent)
+	return str
+
+
+export def reindent str,indent,startLine = 0
+	return str unless indent
+	var lines = str.split('\n')
+	return str if lines:length <= startLine
+
+	for ln,i in lines
+		continue if i < startLine
+		lines[i] = indent + ln
+
+	return lines.join('\n')
 
 
 export def repeatString str, count
