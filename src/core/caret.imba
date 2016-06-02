@@ -53,6 +53,12 @@ export class Caret
 	def modified
 		view.listeners.emit('SelectionModified',region,self)
 		self
+
+	def broadcast
+		if view.@batch:keydown or view.@batch:touch or view.@batch:input
+			console.log 'caret broadcast keydown'
+			view.trigger('scrimbla:caret:move',caret: self, value: [region.a,region.b])
+
 	# what does this do?
 	def normalize
 		# head.normalize
@@ -79,10 +85,12 @@ export class Caret
 	def move offset = 1, mode = 0
 		return self if offset == 0
 		console.log 'move caret-mark',offset,mode
+		var orig = region.clone
 		var to = Math.max(Math.min(buffer.size,region.b + offset),0)
 		region.b = to
 		region.collapseToHead if @collapsed # confusing
 		modified
+		broadcast
 		unblink(yes)
 		return self
 
@@ -164,6 +172,7 @@ export class Caret
 		let sel
 		# need a different syntax for $0 -- can be in regular pasted code
 		# should have a separate command for insertSnippet probably.
+		# what happens if we paste something that contains this?
 		if text.indexOf('$0') >= 0
 			sel = region.clone(0,sub:length).move(text.indexOf('$0'))
 			text = text.replace('$0',sub)
@@ -173,8 +182,10 @@ export class Caret
 		view.runCommand('Insert', region.start, text)
 
 		if sel
+			console.log 'sel modified!!',view.@batch
 			region = sel
 			modified
+			broadcast
 		return self
 
 	def erase mode

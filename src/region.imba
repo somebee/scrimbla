@@ -50,6 +50,7 @@ export class Region
 
 	def adjust rel, add = yes
 		var inside = start <= rel.start and end >= rel.end
+
 		if add
 			if rel.start <= start
 				move(rel.size)
@@ -60,6 +61,10 @@ export class Region
 			if equals(rel)
 				# console.log "ADJUST EQUALS!!!",rel,self
 				collapseToStart
+			elif start >= rel.start and rel.end >= end
+				# this is really inside the region
+				a = b = rel.start
+
 			elif rel.end <= start
 				console.log 'relative end is before own start'
 				move(-rel.size)

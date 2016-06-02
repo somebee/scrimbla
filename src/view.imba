@@ -68,6 +68,7 @@ tag imview
 
 	def build
 		VIEW = self
+		@batch = {}
 
 		# need better control of this
 		if $web$
@@ -286,8 +287,11 @@ tag imview
 			e.cancel
 			return
 
-		trykeydown(e)
+		batch(trigger: yes, keydown: yes) do
+			trykeydown(e)
+
 		listeners.emit('AfterKeydown',[])
+		self
 
 	def trykeydown e
 		VIEW = self # hack
@@ -347,7 +351,7 @@ tag imview
 			elif !shift and @mark.region.size > 0
 				# this basically collapses the marker
 				dir > 0 ? @mark.collapseToEnd : @mark.collapseToStart
-				@mark.modified
+				@mark.broadcast
 				# caret.head.set(dir > 0 ? ends[1] : ends[0])
 				# caret.dirty # should not need to call this all the time
 				return e.cancel
@@ -400,7 +404,8 @@ tag imview
 		# console.log 'keypress',text
 		e.@text = text
 		e.cancel
-		ontype(e)
+		batch(trigger: yes, input: yes) do
+			ontype(e)
 		# listeners.emit('Keypress',[])
 		self
 
@@ -408,7 +413,9 @@ tag imview
 		e.@text = e.event:data
 		console.log 'textinput',e.event:data
 		e.halt.cancel
-		ontype(e)
+		batch(trigger: yes, input: yes) do
+			ontype(e)
+
 		self
 
 	def onkeyup e
@@ -532,19 +539,19 @@ tag imview
 		var [r,c] = rcForTouch(touch)
 
 		# @mark.collapsed = no
-		localCaret.moveTo(@buffer.cellToLoc([r,c]))
-		localCaret.collapsed = no
+		batch(touch: yes) do
+			localCaret.moveTo(@buffer.cellToLoc([r,c]))
+			localCaret.collapsed = no
 		self
 
 	def ontouchend touch
 		return unless touch.button == 0
 		var [r,c] = rcForTouch(touch)
 
-		localCaret.moveTo(@buffer.cellToLoc([r,c]))
-		if localCaret.region.size == 0
-			console.log 'collapsed!'
-			localCaret.collapsed = yes
-
+		batch(touch: yes) do
+			localCaret.moveTo(@buffer.cellToLoc([r,c]))
+			if localCaret.region.size == 0
+				localCaret.collapsed = yes
 		self
 
 	def erase reg, edit
@@ -553,6 +560,9 @@ tag imview
 		var text = reg.text
 		history.onerase(reg,text,edit)
 		listeners.emit('Modified', ['Erase',reg,text])
+
+		if @batch:trigger
+			trigger('scrimbla:erase',[reg.start,reg.size,text])
 
 		var spans = nodesInRegion(reg,no,yes)
 		# gropu the nodes
@@ -611,8 +621,9 @@ tag imview
 
 		history.oninsert(point,str,edit)
 		listeners.emit('Modified', ['Insert',point,str])
-		# create command-objects for these?
-		# var tcm = listeners.emit('TextCommand',['insert',point,str])
+
+		if @batch:trigger
+			trigger('scrimbla:insert',[point,str])
 
 		# log 'insert in view'
 		var spans = nodesInRegion(Region.normalize(point,self),no)
@@ -694,10 +705,11 @@ tag imview
 		self.insert(region.start,str)
 		self
 
-	def batch &cb
-		@batching = yes
+	def batch opts = {}, &cb
+		var prev = @batch
+		@batch = opts
 		cb and cb()
-		@batching = no
+		@batch = prev
 		self
 
 	def onmutations
