@@ -6,7 +6,7 @@ import Command from './command'
 export class Caret
 	
 	prop view
-	prop region
+	prop region watch: yes
 	prop collapsed
 	prop active
 	prop color
@@ -37,6 +37,21 @@ export class Caret
 		modified if broadcast
 		self
 
+	def regionDidSet new, old
+		if !old or (new and !new.equals(old))
+			console.log 'region did change'
+			var mode = view.@batch
+
+			if mode:keydown or mode:touch or mode:input
+				view.trigger('scrimbla:caret:move',
+					caret: self,
+					value: new.toJSON,
+					prev: old and old.toJSON,
+					rel: old and new.relativeTo(old).toJSON
+				)
+
+		self
+
 	def destroy
 		deactivate
 		view.carets.remove(self)
@@ -55,9 +70,10 @@ export class Caret
 		self
 
 	def broadcast
-		if view.@batch:keydown or view.@batch:touch or view.@batch:input
-			console.log 'caret broadcast keydown'
-			view.trigger('scrimbla:caret:move',caret: self, value: [region.a,region.b])
+		self
+		# if view.@batch:keydown or view.@batch:touch or view.@batch:input
+		# 	console.log 'caret broadcast keydown'
+		# 	view.trigger('scrimbla:caret:move',caret: self, value: [region.a,region.b])
 
 	# what does this do?
 	def normalize
@@ -85,12 +101,14 @@ export class Caret
 	def move offset = 1, mode = 0
 		return self if offset == 0
 		console.log 'move caret-mark',offset,mode
-		var orig = region.clone
+		var new = region.clone
 		var to = Math.max(Math.min(buffer.size,region.b + offset),0)
-		region.b = to
-		region.collapseToHead if @collapsed # confusing
-		modified
-		broadcast
+
+		new.b = to
+		new.collapseToHead if @collapsed # confusing
+		region = new
+		# modified
+		# broadcast
 		unblink(yes)
 		return self
 
@@ -134,20 +152,20 @@ export class Caret
 		self
 
 	def collapseToStart
-		region.collapseToStart
+		region = region.clone.collapseToStart
 		collapsed = yes
 		self
 
 
 	def collapseToEnd
-		region.collapseToEnd
+		region = region.clone.collapseToEnd
 		collapsed = yes
 		self
 
 	def expandToLines
 		console.log 'caret expandToLines'
 		collapsed = no
-		region.expandToLines
+		region = region.clone.expandToLines
 		self
 
 	def selectAll
@@ -184,8 +202,6 @@ export class Caret
 		if sel
 			console.log 'sel modified!!',view.@batch
 			region = sel
-			modified
-			broadcast
 		return self
 
 	def erase mode
@@ -206,7 +222,8 @@ export class Caret
 		console.log 'erasing region',region
 
 		view.erase(region)
-		collapseToStart # should happen be default through adjust no?
+		# collapseToStart # should happen be default through adjust no?
+		collapsed = yes
 		return self
 
 	def paste text
@@ -250,6 +267,9 @@ export class Caret
 	def blink force
 		@node.blink(force) if @node
 		self
+
+	def toJSON
+		region.toJSON
 
 export class RemoteCaret < Caret
 	

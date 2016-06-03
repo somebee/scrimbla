@@ -97,6 +97,8 @@ tag imview
 		dom.addEventListener('mouseout') do |e| Imba.Events.delegate(e)
 
 		worker ||= IM.worker # imba specific
+
+		Imba.emit(self,'built')
 		self
 
 	def onmouseover e
@@ -204,6 +206,12 @@ tag imview
 		root.size
 
 	def load code, o = {}
+		unless @built
+			console.log 'delay loading'
+			Imba.once(self,'built') do load(code,o)
+			return self
+
+
 		filename = o:filename
 
 		if o:html

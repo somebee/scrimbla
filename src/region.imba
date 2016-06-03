@@ -82,7 +82,7 @@ export class Region
 		
 	def relativeTo rel
 		# could use move instead
-		Region.new(@a - rel.start,@b - rel.start,@root,@view)
+		Region.new(@a - rel.a,@b - rel.b,@root,@view)
 
 	def intersection region
 		self
@@ -139,9 +139,11 @@ export class Region
 
 	def collapseToStart
 		@a = @b = start
+		self
 
 	def collapseToEnd
 		@a = @b = end
+		self
 
 	# expand to closest /n
 	def expand atStart, atEnd
@@ -274,5 +276,8 @@ export class Region
 		{startLine: 0, startCol: 2}
 
 	def toJSON
+		[a,b]
+
+	def toArray
 		[a,b]
 	
