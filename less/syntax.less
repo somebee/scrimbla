@@ -70,6 +70,7 @@
 	.identifier { color: @identifier; }
 	.const { color: @const; }
 	.access{ color: @identifier; }
+	.symbol{ color: @symbol; }
 	// .function { color: @decl; }
 
 	.ivar { color: @ivar; }
@@ -230,6 +231,8 @@
 			color: inherit;
 		}
 	}
+
+	.identifier + .op.colon { color: white; }
 }
 
 .light-syntax () {
