@@ -497,7 +497,8 @@ tag imview
 		var data = e.event:clipboardData
 		var text = data.getData('text/plain')
 		e.halt.cancel
-		localCaret.paste(text)
+		batch(trigger: yes) do
+			localCaret.paste(text)
 		refocus
 		repair
 
