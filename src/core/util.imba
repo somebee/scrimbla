@@ -145,6 +145,10 @@ export def colsForLine line, tabsize = 4
 	var col = 0
 	var idx = 0
 	var char
+
+	if line.indexOf('\t') == -1
+		return line:length
+
 	while char = line[idx++]
 		if char == '\t'
 			var rest = tabsize - col % tabsize

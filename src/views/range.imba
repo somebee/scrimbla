@@ -68,8 +68,9 @@ export tag RangeView
 
 		for r in [0..@lc]
 			# 80 is arbitrary
+			var str = buffer.lines[@row + r]
 			var c = r == 0 ? @start[1] : 0
-			var l = r == @lc ? (@end[1] - c) : (80 - c)
+			var l = r == @lc ? (@end[1] - c) : (Scrimbla:util.colsForLine(str) - c)
 			@regions.push([r,c,l])
 		self
 

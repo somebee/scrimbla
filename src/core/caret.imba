@@ -39,7 +39,7 @@ export class Caret
 
 	def regionDidSet new, old
 		if !old or (new and !new.equals(old))
-			console.log 'region did change'
+			# console.log 'region did change'
 			var mode = view.@batch
 
 			if mode:keydown or mode:touch or mode:input
@@ -49,7 +49,6 @@ export class Caret
 					prev: old and old.toJSON,
 					rel: old and new.relativeTo(old).toJSON
 				)
-
 		self
 
 	def destroy
@@ -94,7 +93,7 @@ export class Caret
 		collapsed = no
 		# tail = head.clone if tail == head
 		self
-
+		
 	def collapsed
 		@collapsed and region.size == 0
 

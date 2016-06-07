@@ -104,6 +104,9 @@ export class Buffer
 		var col = cell[1]
 		var lines = lines
 
+		if row >= lines:length
+			return size
+
 		for line,i in lines
 			if i < row
 				loc += line:length + 1 # the last line
@@ -144,7 +147,8 @@ export class Buffer
 			return loc
 
 		elif mode == IM.WORD_END
-			while chr = @buffer[loc + 1]
+			while true
+				chr = @buffer[loc + 1]
 				if !chr or chr in [' ','\t','\n','.','"',"'"]
 					return loc + 1
 				loc += 1

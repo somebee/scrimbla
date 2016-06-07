@@ -96,6 +96,13 @@ tag imview
 		dom.addEventListener('mouseover') do |e| Imba.Events.delegate(e)
 		dom.addEventListener('mouseout') do |e| Imba.Events.delegate(e)
 
+		dom.addEventListener('focus') do |e|
+			didfocus(e)
+
+		dom.addEventListener('blur') do |e|
+			didblur(e)
+			
+
 		worker ||= IM.worker # imba specific
 
 		Imba.emit(self,'built')
@@ -241,6 +248,7 @@ tag imview
 		VIEW = self
 		flag('focus')
 		@caret.activate
+		console.log 'activating caret'
 		# this is _only_ to get working copy/paste and textinput event
 		# all native behaviour is cancelled / overridden
 		dom:contentEditable = yes
@@ -249,7 +257,21 @@ tag imview
 	def onfocusout e
 		unflag('focus')
 		dom:contentEditable = no
-		@caret.deactivate
+		console.log 'onfocusout'
+
+		if @caret.active
+			@caret.deactivate
+			trigger('scrimbla:caret:deactivate',{caret: @caret})
+		self
+
+	def didfocus e
+		unless hasFlag('focus')
+			onfocusin(e)
+		self
+
+	def didblur e
+		if hasFlag('focus')
+			onfocusout(e)
 		self
 
 	def oninput e
@@ -327,7 +349,7 @@ tag imview
 			e.halt
 			hints.activate
 
-			@mark.collapsed = !shift
+			@caret.collapsed = !shift
 
 			# shift ? caret.decollapse : caret.collapse
 
@@ -356,10 +378,10 @@ tag imview
 			elif sup
 				mode = dir > 0 ? IM.LINE_END : IM.LINE_START
 
-			elif !shift and @mark.region.size > 0
+			elif !shift and @caret.region.size > 0
 				# this basically collapses the marker
-				dir > 0 ? @mark.collapseToEnd : @mark.collapseToStart
-				@mark.broadcast
+				dir > 0 ? @caret.collapseToEnd : @caret.collapseToStart
+				@caret.broadcast
 				# caret.head.set(dir > 0 ? ends[1] : ends[0])
 				# caret.dirty # should not need to call this all the time
 				return e.cancel
@@ -393,7 +415,7 @@ tag imview
 		self
 
 	def localCaret
-		@mark
+		@caret
 
 	def onkeypress e
 		if @awaitCombo
@@ -526,7 +548,12 @@ tag imview
 		var e = touch.event
 		e.preventDefault
 		var shift = e:shiftKey
-		@mark.collapsed = !shift
+		@caret.collapsed = !shift
+		console.log 'touchstart',@caret.collapsed
+
+		if shift
+			touch.@caretStart = caret.region.a
+
 		dom.focus
 		self
 
@@ -547,20 +574,30 @@ tag imview
 		return unless touch.button == 0
 		var [r,c] = rcForTouch(touch)
 
+		var caret = localCaret
+
 		# @mark.collapsed = no
 		batch(touch: yes) do
-			localCaret.moveTo(@buffer.cellToLoc([r,c]))
-			localCaret.collapsed = no
+			var loc = @buffer.cellToLoc([r,c])
+			
+
+			if touch.@caretStart == null
+				touch.@caretStart = loc
+			
+			touch.@caretEnd = loc
+			# console.log 'ontouchupdate',touch.@caretStart,loc
+			caret.set([touch.@caretStart,touch.@caretEnd])
+			# caret.collapsed = no
 		self
 
 	def ontouchend touch
 		return unless touch.button == 0
 		var [r,c] = rcForTouch(touch)
 
-		batch(touch: yes) do
-			localCaret.moveTo(@buffer.cellToLoc([r,c]))
-			if localCaret.region.size == 0
-				localCaret.collapsed = yes
+		# batch(touch: yes) do
+		# 	# localCaret.moveTo(@buffer.cellToLoc([r,c]))
+		# 	# if localCaret.region.size == 0
+		# 	# 	localCaret.collapsed = yes
 		self
 
 	def erase reg, edit
