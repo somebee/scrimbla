@@ -32,6 +32,7 @@ require './core/shortcuts'
 
 require "./views/captor"
 require "./views/caret"
+require "./views/hint"
 require "./view"
 require "./editor"
 

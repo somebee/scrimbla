@@ -178,6 +178,7 @@ tag imview
 			<.markers>
 				<@origo> '|'
 				carets.map(|caret| caret.node.end)
+				hints.map(|hint| hint.popup )
 			# @marks.map(|mark| mark.node.end)
 			<imroot@root.imba view=self>
 
@@ -842,11 +843,13 @@ tag imview
 				warn:type ||= 'error'
 				warn:group = 'analysis'
 				# dont show errors
-				# hints.add(warn).activate
+				hints.add(warn)
+				# .activate
 
 			WARNS = warnings
 
 			trigger(:annotate,meta)
+
 			return self if warnings:length
 
 			var nodes = IM.textNodes(root.dom,yes)

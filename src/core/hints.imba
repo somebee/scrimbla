@@ -103,6 +103,12 @@ export class Hint
 		region.adjust(reg,ins)
 		self
 
+	def popup
+		<hintview@popup[self]>
+
+
+# TODO use List
+
 export class Hints
 	
 	var nr = 0
@@ -166,6 +172,9 @@ export class Hints
 
 	def filter cb
 		@array.filter(cb)
+
+	def map cb
+		@array.map(cb)
 
 	def add o
 		var ref = o:ref = "hint{nr++}"

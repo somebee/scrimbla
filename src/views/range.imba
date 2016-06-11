@@ -83,5 +83,11 @@ export tag RangeView
 		<self.RangeView .collapsed=(region.size == 0)>
 			if region.size > 0
 				ranges
-			<LocView.loc.a view=view row=(@a[0] - row) col=(@a[1])>
-			<LocView.loc.b view=view  row=(@b[0] - row) col=(@b[1])>
+			aview
+			bview
+
+	def aview
+		<LocView@aview.loc.a row=(@a[0] - row) col=(@a[1])>
+
+	def bview
+		<LocView@bview.loc.b row=(@b[0] - row) col=(@b[1])>
