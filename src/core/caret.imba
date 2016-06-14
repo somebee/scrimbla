@@ -225,10 +225,18 @@ export class Caret
 		collapsed = yes
 		return self
 
-	def paste text
+	def paste text, options = {}
+
 		# remove invisible characters
 		text = text.replace(/[\u200B-\u200D\uFEFF\x7F]/g, "")
+		var multiline = text.indexOf('\n') >= 0
+
+		# possibly reindent the first line with the supplied indentation
+		if multiline and options:indent and text.indexOf(options:indent) != 0
+			text = options:indent + text
+
 		text = util.cleanIndent(text)
+
 		# automatically reindent - should be possible to opt out
 		text = util.reindent(text,indent,1)
 		insert(text)

@@ -500,7 +500,14 @@ tag imview
 	def oncopy e
 		log('oncopy',e,localCaret.text)
 		var data = e.event:clipboardData
-		data.setData('text/plain', localCaret.text)
+		console.log 'oncopy',localCaret.indent,'indent?'
+		var clip =
+			indent: localCaret.indent
+			text: localCaret.text
+
+		data.setData('text/plain', clip:text)
+		data.setData('application/json', JSON.stringify(clip))
+
 		e.halt.cancel
 		refocus
 		return
@@ -508,8 +515,16 @@ tag imview
 	def oncut e
 		log 'oncut',e
 		var data = e.event:clipboardData
-		data.setData('text/plain', localCaret.text)
+
+		var clip =
+			indent: localCaret.indent
+			text: localCaret.text
+
+		data.setData('text/plain', clip:text)
+		data.setData('application/json', JSON.stringify(clip))
+
 		e.halt.cancel
+		# must also be included in stream
 		localCaret.erase
 
 	def onbeforepaste e
@@ -519,9 +534,10 @@ tag imview
 		# log 'onpaste',e
 		var data = e.event:clipboardData
 		var text = data.getData('text/plain')
+		var json = data.getData('application/json')
 		e.halt.cancel
 		batch(trigger: yes) do
-			localCaret.paste(text)
+			localCaret.paste(text, json ? JSON.parse(json) : {})
 		refocus
 		repair
 
