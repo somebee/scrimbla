@@ -10,6 +10,8 @@ tag hintview
 	prop row watch: yes
 	prop col watch: yes
 	prop len watch: yes
+	prop active watch: yes
+
 
 	def rowDidSet new, old
 		var val = "{new * 100}%"
@@ -22,6 +24,9 @@ tag hintview
 	def lenDidSet new, old
 		var width = "{new * 100}%"
 		@dom:style:width = width
+
+	def activeDidSet bool
+		setTimeout(&,0) do flag('active',bool)
 
 	def buffer
 		view.@buffer
@@ -41,9 +46,19 @@ tag hintview
 
 		row = a[0]
 		col = a[1]
+
+		if a[0] == b[0] and reg.size > 1
+			len = reg.size
 		
-		<self.hint .{object.type} .active=(object.active) .collapsed=(reg.size == 0)>
-			<.tip> <.label> object.label
+		<self.hint .{object.type} active=(object.active) .collapsed=(reg.size == 0)>
+			<.tip>
+				<@label>
+				<@arrow>
+			<.line>
+
+		if @hint != object.label
+			@label.dom:innerHTML = @hint = object.label
+		self
 
 	# def render
 	# 	super

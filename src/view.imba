@@ -383,12 +383,12 @@ tag imview
 				# this basically collapses the marker
 				dir > 0 ? @caret.collapseToEnd : @caret.collapseToStart
 				@caret.broadcast
-				# caret.head.set(dir > 0 ? ends[1] : ends[0])
-				# caret.dirty # should not need to call this all the time
+				hints.activate
 				return e.cancel
 
 			# caret.move(dir,mode)
 			localCaret.alter(dir,mode)
+			hints.activate
 
 			return e.cancel
 

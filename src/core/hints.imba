@@ -2,8 +2,9 @@ import Region from '../region'
 
 var labels =
 	"Unexpected 'TAG_END'": 'Tag closed unexpectedly'
-	"Unexpected 'TERMINATOR'": 'Unexpected ⏎'
-	"Unexpected 'POST_IF'": 'Missing body in <b>IF</b>'
+	"Unexpected 'TERMINATOR'": 'Unexpected <b>⏎</b>'
+	"Unexpected 'POST_IF'": 'Missing body in <b>if</b>'
+	"Unexpected 'DEF_EMPTY'": 'Unexpected <b>def</b>'
 
 var rules = [
 	[/Uncaught Error: tag (\w+) is not defined/,"tag <b>$1</b> does not exist"]
@@ -24,7 +25,7 @@ export class Hint
 		@active = no
 		@region = opts:loc ? Region.normalize(opts:loc,view) : null
 		# try to find the node immediately
-		@node = opts:node || node
+		@node = opts:node # || node
 		self
 
 	def getAttribute key
@@ -63,7 +64,7 @@ export class Hint
 		unless @active
 			# node?.setAttribute('hint',ref)
 			@active = yes
-			node?.setHint(self)
+			# node?.setHint(self)
 		self
 
 	def deactivate
@@ -99,7 +100,7 @@ export class Hint
 			# deactivate
 			prune
 			# @deactivate = yes
-
+		# really?
 		region.adjust(reg,ins)
 		self
 
