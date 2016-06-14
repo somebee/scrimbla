@@ -247,9 +247,11 @@ IM.Triggers = [
 		command: do |sel| sel.move(1) # override to do nothing
 
 	trigger '[' do |sel| sel.insert('[$0]')
-	trigger '|' do |sel| sel.insert('|$0|')
 	trigger '(' do |sel| sel.insert('($0)')
 	trigger '{' do |sel| sel.insert('{$0}')
+	trigger '|'
+		context: do |sel| sel.peekbehind(/(\bdo\s*|\()$/)
+		command: do |sel| sel.insert('|$0|')
 
 	trigger '<'
 		context: do |sel| !sel.peekbehind(/(\b(tag|if|class) |\d\s*$)/)
