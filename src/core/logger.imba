@@ -5,7 +5,7 @@ export class Logger
 	prop view
 
 	def initialize view
-		@enabled = no
+		@enabled = $debug$
 		@view = view
 		self
 

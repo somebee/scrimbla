@@ -7,6 +7,7 @@ export class ListenerManager < List
 	def initialize view
 		@view = view
 		@array = []
+		@stack = []
 		self
 
 	def will-add item
@@ -17,9 +18,23 @@ export class ListenerManager < List
 
 	def emit event, params
 		# console.log 'emit event for ListenerManager',event,params
-		let ret
-		map do |item| ret = item.on-event(event,params)
-		return ret
+		if let batch = @stack[0]
+			batch:events.push([event,params])
+			return yes
+		else
+			let ret
+			map do |item| ret = item.on-event(event,params)
+			return ret
+
+	def multi o = {}, &cb
+		o:events = []
+		@stack.unshift(o)
+		cb and cb(o)
+		if o:events:length
+			map do |item| item.on-events(o:events,o)
+		@stack.shift
+		self
+
 
 export class Listener
 	
@@ -44,6 +59,11 @@ export class Listener
 		let fn = self["on{event}"]
 		if fn
 			return fn.call(self,params)
+
+	def on-events events, options
+		for event in events
+			on-event(event[0],event[1])
+		return self
 
 	# Called when a new buffer is created.
 	def on-new view

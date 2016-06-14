@@ -321,7 +321,7 @@ tag imview
 		batch(trigger: yes, keydown: yes) do
 			trykeydown(e)
 
-		listeners.emit('AfterKeydown',[])
+		# listeners.emit('AfterKeydown',[])
 		self
 
 	def trykeydown e
@@ -683,6 +683,7 @@ tag imview
 		# should maybe create this as a command - and then make it happen?
 
 		history.oninsert(point,str,edit)
+
 		listeners.emit('Modified', ['Insert',point,str])
 
 		if @batch:trigger
@@ -771,7 +772,9 @@ tag imview
 	def batch opts = {}, &cb
 		var prev = @batch
 		@batch = opts
-		cb and cb()
+		# batch listeners as well
+		listeners.multi(opts,cb)
+		# cb and cb()
 		@batch = prev
 		self
 

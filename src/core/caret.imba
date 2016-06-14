@@ -42,6 +42,14 @@ export class Caret
 			# console.log 'region did change'
 			var mode = view.@batch
 
+			var opts = {
+				region: new.toJSON,
+				prev: old and old.toJSON,
+				rel: old and new.relativeTo(old).toJSON
+			}
+
+			view.listeners.emit('SelectionModified',opts,self)
+
 			if mode:keydown or mode:touch or mode:input
 				view.trigger('scrimbla:caret:move',
 					caret: self,
