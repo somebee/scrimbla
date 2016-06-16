@@ -96,26 +96,25 @@
 
 	// Nesting tag
 	._imtagnode {
-		color: @tag;
+		// color: @tag;
+		& > :not(.value) { color: @tag; }
 
 		& > ._imopen, & > ._imclose { color: @tag-brackets; }
-		& > ._identifier:not(.lvar) { color: inherit; }
-		& > .eq { color: inherit; }
-		
+
 		.tag_attr { color: @tag-attr-key; }
 		& > .tag_type { color: @tag-name; }
 		& > ._imopen:first-child + .identifier { color: @tag-name; }
-		.dot + .identifier { color: @tag-class; }
-
-		& > .eq + .identifier { color: @identifier; }
-		& > .eq + .lvar { color: @lvar; }
 		
-		& > .dot { color: inherit; }
-		& > .hash { color: inherit; }
-		& > .hash + .identifier { color: inherit; }
+		& > .dot + .identifier { color: @tag-class; }
+		// & > .eq + .identifier { color: @identifier; }
+		// & > .eq + .lvar { color: @lvar; }
+		// & > .dot { color: inherit; }
+		& > .hash { color: @tag; }
+		// & > .hash + .identifier { color: inherit; }
 
-		& > .self, & > .ivar { color: @tag-name; }
-		& > .paren > .rb:not(.call) { color: inherit; }
+		& > .self {color: @tag-self; }
+		& > .ivar { color: @tag-ref; }
+		// & > .paren > .rb:not(.call) { color: inherit; }
 		& > .string {
 			s { color: @tag-string-quotes; }
 		}
@@ -223,12 +222,16 @@
 	.dark-colors;
 	.base-syntax;
 
-	._imtagnode > ._imopen, ._imtagnode > ._imclose {
-		color: #987A32;	
+	// ._imtagnode > ._imopen, ._imtagnode > ._imclose {
+	// 	color: #987A32;	
+	// }
+	.tagnode {
+		// background: rgba(217, 187, 114, 0.1);
+		// border-radius: 30px;
 	}
 	._imtagnode:hover {
 		& > ._imopen, & > ._imclose {
-			color: inherit;
+			color: @tag;
 		}
 	}
 

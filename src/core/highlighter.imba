@@ -47,6 +47,7 @@ var classes = {
 	'yes': '_imbool true'
 	'false': '_imbool false'
 	'no': '_imbool false'
+	'value': '_imvalue'
 
 	'{{': '_imopen'
 	'}}': '_imclose'
@@ -104,6 +105,7 @@ var OPEN = {
 	'string_start': '_imistring'
 	'index_start': '_imindex'
 	'block_param_start': '_impair _imblockparams'
+	'value_start': '_imvalue'
 	# 'indent': '_indent'
 	'(': '_imparens paren'
 	'{{': '_imiexpr'
@@ -121,6 +123,7 @@ var CLOSE = {
 	'selector_end': 'sel'
 	'index_end': '_imindex'
 	'block_param_end': '_impair _imblockparams'
+	'value_end': '_imvalue'
 	'}}': '_imiexpr'
 	')': 'paren'
 	']': 'square'
@@ -235,6 +238,7 @@ export class Highlighter
 			'{': '}'
 			'[': ']'
 			'(': ')'
+			'VALUE_START': 'VALUE_END'
 		}
 
 		var naming = {
@@ -244,6 +248,7 @@ export class Highlighter
 			'CALL_START': 'parens'
 			'INDEX_START': 'square'
 			'BLOCK_PARAM_START': 'blockparams'
+			'VALUE_START': 'value'
 			'{{': 'iexpr'
 			'{': 'curly'
 			'[': 'square'
@@ -270,6 +275,7 @@ export class Highlighter
 			typ = tok.@type
 
 			# normalizing because we dont rewrite tokens (should start with that)
+			# could use pairing provided by the lexer directly instead?
 			typ = tok.@type = 'KEYWORD' if typ == 'IDENTIFIER' and (val == 'prop' or val == 'attr') # not always
 			typ = tok.@type = '[' if typ == 'INDEX_START'
 			typ = tok.@type = ']' if typ == 'INDEX_END'

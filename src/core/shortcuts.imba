@@ -187,6 +187,15 @@ IM.KeyBindings = [
 	combo ["alt+backspace"] do |sel| sel.erase(IM.WORD_START)
 	combo ["super+backspace"] do |sel| sel.erase(IM.LINE_START)
 
+	combo ["super+shift+backspace"] do |sel|
+		var text = sel.region.text
+		var around = text[0] + text.slice(-1)
+
+		if around in ['[]','{}','()']
+			sel.insert(text.slice(1,-1))
+			yes
+		# sel.erase(IM.LINE_START)
+
 	combo ["del"] do |sel|
 		sel.size > 0 ? sel.erase : sel.expand(0,1).erase
 	

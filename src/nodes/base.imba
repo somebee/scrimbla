@@ -463,6 +463,9 @@ tag imfragment < imraw
 
 IMFragment = Imba.TAGS:imfragment
 
+tag imvalue < im
+	type 'value'
+
 tag imopen < im
 
 	# @nodeType = 's'
