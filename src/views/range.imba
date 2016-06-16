@@ -36,6 +36,7 @@ export tag LineRegionView
 		var width = "{new * 100}%"
 		@dom:style:width = width
 
+
 export tag RangeView
 
 	prop view
@@ -70,7 +71,7 @@ export tag RangeView
 			# 80 is arbitrary
 			var str = buffer.lines[@row + r]
 			var c = r == 0 ? @start[1] : 0
-			var l = r == @lc ? (@end[1] - c) : (Scrimbla:util.colsForLine(str) - c)
+			var l = r == @lc ? (@end[1] - c) : ((Scrimbla:util.colsForLine(str) - c) or 0.5)
 			@regions.push([r,c,l])
 		self
 
