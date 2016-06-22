@@ -68,13 +68,15 @@
 	.bool,.false,.true,.null,.undefined,.literal { color: @bool; }
 
 	.identifier { color: @identifier; }
+	.key { color: @obj-key; }
+	.key + .colon { color: @obj-key; }
 	.const { color: @const; }
 	.access{ color: @identifier; }
 	.symbol{ color: @symbol; }
 	// .function { color: @decl; }
 
 	.ivar { color: @ivar; }
-	.lvar,.title{ color: @lvar; }
+	.lvar { color: @lvar; }
 	.methref{ color: @methref; }
 	.const.lvar { color: @const; }
 

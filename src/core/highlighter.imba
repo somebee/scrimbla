@@ -58,6 +58,7 @@ var classes = {
 
 	'regex': '_imregex regex'
 	'identifier': '_imtok _imidentifier identifier'
+	'key': '_imkey key'
 
 	'compound_assign': 'op assign compound'
 	'str': '_imstr string'

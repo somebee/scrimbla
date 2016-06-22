@@ -136,6 +136,29 @@ tag imidentifier < imtok
 			clearVarRef
 		super
 
+tag imkey < imtok
+	type 'key'
+
+	attr name
+
+	def validate code
+		# regex for identifier
+		(/^[a-z](-?[\wA-Za-z_\-\x7f-\uffff\$]+)*$/).test(code) and keywords.indexOf(code) == -1
+
+	def setup tok, new, old
+		# console.log 'identifier setup',baseClasses
+		name = tok.@value if tok and tok.@value
+		@dom:className = baseClasses
+		self
+
+	def mutated
+		# console.log 'imidentifier mutated'
+		name = code
+		if isVarRef
+			clearVarRef
+		super
+
+
 tag imtagtype < imtok
 	type 'tag_type'
 
