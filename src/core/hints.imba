@@ -8,6 +8,7 @@ var labels =
 
 var rules = [
 	[/Uncaught Error: tag (\w+) is not defined/,"tag <b>$1</b> does not exist"]
+	[/tag\$\.\$([\w\_]+) is not a function/,"tag <b>$1</b> is not defined"]
 ]
 
 export class Hint
@@ -58,6 +59,11 @@ export class Hint
 			var lbl = @data:label or @data:message or 'Hint'
 			lbl = lbl.split(/error at (\[[\d\:]*\])\:\s*/).pop
 			lbl = labels[lbl] or lbl
+
+			for rule in rules
+				if rule[0].test(lbl)
+					lbl = lbl.replace(rule[0],rule[1])
+			lbl
 
 
 	def activate
