@@ -12,7 +12,7 @@ import Logger from './core/logger'
 import History from './core/history'
 import Buffer from './core/buffer'
 import Observer from './core/observer'
-import Carets,Caret from './core/caret'
+import Carets,Caret,LocalCaret,RemoteCaret from './core/caret'
 
 import Region from './region'
 import Hints,Hint from './core/hints'
@@ -80,9 +80,7 @@ tag imview
 		@changes = 0
 
 		@carets = Carets.new(self)
-		@carets.add(@mark = @caret = Caret.new(self))
-		# custom temporary
-		@marks = Carets.new(self)
+		@carets.add(@mark = @caret = LocalCaret.new(self))
 
 		@listeners = ListenerManager.new(self)
 		@hints     = Hints.new(self)
@@ -179,7 +177,6 @@ tag imview
 				<@origo> '|'
 				carets.map(|caret| caret.node.end)
 				hints.map(|hint| hint.popup )
-			# @marks.map(|mark| mark.node.end)
 			<imroot@root.imba view=self>
 
 	def header
@@ -314,14 +311,9 @@ tag imview
 			# pass through
 			return
 
-		if !editable
-			e.cancel
-			return
-
 		batch(trigger: yes, keydown: yes) do
 			trykeydown(e)
 
-		# listeners.emit('AfterKeydown',[])
 		self
 
 	def trykeydown e
@@ -650,9 +642,6 @@ tag imview
 		for caret in carets
 			caret.adjust(reg,no)
 
-		for mark in @marks
-			mark.adjust(reg,no)
-
 		edited
 		repair # repair synchronously
 
@@ -755,9 +744,6 @@ tag imview
 
 		for caret in carets
 			caret.adjust(reg,yes)
-
-		for mark in @marks
-			mark.adjust(reg,yes)
 
 		edited
 		repair if util.isWhitespace(str)

@@ -96,6 +96,9 @@ export class Caret
 	def size
 		region.size
 
+	def canEdit
+		@active
+
 	def decollapse
 		# just a friendly flag to say that the caret
 		collapsed = no
@@ -183,6 +186,11 @@ export class Caret
 		self
 
 	def insert text, edit
+		unless canEdit
+			# console.log 'caret.insert -- not allowed'
+			view.trigger('scrimbla:readonly',[self,'insert',text])
+			return
+
 		var sub = ''
 		view.history.mark('action')
 		unblink(yes)
@@ -212,6 +220,11 @@ export class Caret
 		return self
 
 	def erase mode
+		unless canEdit
+			# console.log 'caret.erase -- not allowed'
+			view.trigger('scrimbla:readonly',[self,'erase'])
+			return
+
 		console.log 'erase!!'
 		unblink(yes)
 		view.history.mark('action')
@@ -234,7 +247,6 @@ export class Caret
 		return self
 
 	def paste text, options = {}
-
 		# remove invisible characters
 		text = text.replace(/[\u200B-\u200D\uFEFF\x7F]/g, "")
 		var multiline = text.indexOf('\n') >= 0
@@ -286,7 +298,16 @@ export class Caret
 	def toJSON
 		region.toJSON
 
+export class LocalCaret < Caret
+	
+	def canEdit
+		@active and view.editable
+
+
 export class RemoteCaret < Caret
+
+	def canEdit
+		yes
 	
 	def node
 		@node ||= <caretview[self].remote.caret>
