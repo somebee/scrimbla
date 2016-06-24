@@ -15,6 +15,10 @@ IM.SUB_WORD_END = 6
 IM.LINE_START = 7
 IM.LINE_END = 8
 IM.EMPTY_LINE = 9
+IM.IMBA_WORKER_PATH = "/js/scrimbla.worker.js"
+
+if typeof SCRIMBLA_IMBA_WORKER_PATH != undefined
+	IM.IMBA_WORKER_PATH	= SCRIMBLA_IMBA_WORKER_PATH
 
 IM.FS = require './core/fs'
 
