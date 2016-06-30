@@ -242,35 +242,47 @@ tag imview
 		dom.focus unless document:activeElement == dom
 		self
 
-	def onfocusin e
-		VIEW = self
-		flag('focus')
-		@caret.activate
-		console.log 'activating caret'
-		# this is _only_ to get working copy/paste and textinput event
-		# all native behaviour is cancelled / overridden
-		dom:contentEditable = yes
-		self
+	# def onfocusin e
+	# 	VIEW = self
+	# 	flag('focus')
+	# 	@caret.activate
+	# 	console.log 'activating caret'
+	# 	# this is _only_ to get working copy/paste and textinput event
+	# 	# all native behaviour is cancelled / overridden
+	# 	dom:contentEditable = yes
+	# 	self
 
-	def onfocusout e
-		unflag('focus')
-		dom:contentEditable = no
-		console.log 'onfocusout'
-
-		if @caret.active
-			@caret.deactivate
-			trigger('scrimbla:caret:deactivate',{caret: @caret})
-		self
+	# def onfocusout e
+	# 	unflag('focus')
+	# 	dom:contentEditable = no
+	# 	console.log 'onfocusout'
+	# 
+	# 	if @caret.active
+	# 		@caret.deactivate
+	# 		trigger('scrimbla:caret:deactivate',{caret: @caret})
+	# 	self
 
 	def didfocus e
 		unless hasFlag('focus')
-			onfocusin(e)
+			VIEW = self
+			flag('focus')
+			@caret.activate
+			console.log 'activating caret'
+			# this is _only_ to get working copy/paste and textinput event
+			# all native behaviour is cancelled / overridden
+			dom:contentEditable = yes
 		self
 
 	def didblur e
 		if hasFlag('focus')
-			onfocusout(e)
-		self
+			unflag('focus')
+			dom:contentEditable = no
+			console.log 'onfocusout'
+
+			if @caret.active
+				@caret.deactivate
+				trigger('scrimbla:caret:deactivate',{caret: @caret})
+			self
 
 	def oninput e
 		self

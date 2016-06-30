@@ -29,6 +29,24 @@ def api.compile code, o = {}
 	catch e
 		return {error: normalizeError(e,o)}
 
+def api.bundle bundle, o = {}
+	var output = {FILES: {}}
+	for own name,file of bundle.FILES
+		if name.match(/\.imba$/)
+			var jsname = name.replace(/\.imba$/,'.js')
+			var out = output.FILES[jsname] = {}
+			try
+
+				o:filename = name
+				o:sourcePath = name
+				o:targetPath = jsname
+
+				var res = compiler.compile(file:body,o)
+				out:body = res.toString
+			catch e
+				out:error = normalizeError(e,o)
+	return output
+
 def api.analyze code, o = {}
 	var meta
 	try

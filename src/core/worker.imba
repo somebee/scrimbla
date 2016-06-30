@@ -28,3 +28,8 @@ export class ImbacWorker
 		@callbacks.push(cb)
 		worker.postMessage(['analyze',code,o])
 		self
+
+	def bundle bundle, o, cb
+		@callbacks.push(cb)
+		worker.postMessage(['bundle',bundle,o])
+		self
