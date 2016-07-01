@@ -113,7 +113,7 @@ IM.KeyBindings = [
 	# combo ["alt+shift+r"] do |sel| sel.view.history.play
 
 	combo ["super+s"], command: "save"
-	combo ["super+b"], command: "run"
+	# combo ["super+b"], command: "run"
 	combo ["alt+super+s"], command: "saveSession"
 	combo ["alt+shift+l"], command: "reparse"
 	combo ["alt+shift+k"], command: "reparseExtent"
@@ -301,6 +301,20 @@ global class ShortcutManager
 	def self.instance
 		@instance ||= self.new
 
+	def self.keysForEvent e
+		var combo = []
+		var special = specialKeys[e:which]
+		var chr = special or String.fromCharCode(e:which)
+		
+		chr = chr.toLowerCase # unless e:shiftKey
+
+		combo.push('ctrl') if e:ctrlKey and special != 'ctrl'
+		combo.push('alt') if e:altKey and special != 'alt'
+		combo.push('super') if e:metaKey && !e:ctrlKey && special !== 'meta'
+		combo.push('shift') if e:shiftKey and special != 'shift'
+		combo.push(chr) unless combo.indexOf(chr) >= 0
+		return combo.join('+')
+
 	def initialize view, bindings
 		@view = view
 		@bindings = bindings or IM.KeyBindings
@@ -317,19 +331,7 @@ global class ShortcutManager
 		return self
 
 	def keysForEvent e
-		var combo = []
-		var special = specialKeys[e:which]
-		var chr = special or String.fromCharCode(e:which)
-		
-		chr = chr.toLowerCase # unless e:shiftKey
-
-		combo.push('ctrl') if e:ctrlKey and special != 'ctrl'
-		combo.push('alt') if e:altKey and special != 'alt'
-		combo.push('super') if e:metaKey && !e:ctrlKey && special !== 'meta'
-		combo.push('shift') if e:shiftKey and special != 'shift'
-		combo.push(chr) unless combo.indexOf(chr) >= 0
-
-		return combo.join('+')
+		ShortcutManager.keysForEvent(e)
 
 	def commandsForKeys combo
 		@bindings.filter(|binding| binding:keys == combo)

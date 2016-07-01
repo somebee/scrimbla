@@ -185,6 +185,9 @@ tag imview
 	def footer
 		null
 
+	def hud
+		null
+
 	def overlays
 		<scrimbla-overlays@overlays view=self>
 
@@ -194,6 +197,7 @@ tag imview
 			header
 			body
 			footer
+			hud
 
 	def view
 		self
