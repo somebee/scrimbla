@@ -428,12 +428,19 @@ export class Highlighter
 		# big hack - adding a space at the end to close up selectors
 		# should rather drop inline and let the parser pair up loose ends?
 		unless tokens
-			tokens = self.tokenize(code,inline: yes, silent: yes, rewrite: no)
-			tokens = normalizeTokens(code,tokens)
-			logger.log tokens.slice
+			try
+				tokens = self.tokenize(code,inline: yes, silent: yes, rewrite: no)
+				tokens = normalizeTokens(code,tokens)
+				logger.log tokens.slice
+			catch e
+				console.log 'could not reparse tokens',code,e
+				tokens = null
 
 		logger.log nodes.slice
-		applyTokens(code,tokens,nodes,o:nested,o:parent)
+
+		if tokens
+			applyTokens(code,tokens,nodes,o:nested,o:parent)
+
 		logger.timeEnd('reparsing')
 		logger.groupEnd
 		return
