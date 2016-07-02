@@ -10,6 +10,7 @@ export class Region
 	# remove root from region
 
 	def self.normalize val, view
+		return null if val == null
 		return val if val isa Region
 		return Region.new(val[0],val[1],null,view) if val isa Array
 		return Region.new(val,val,null,view) if val isa Number

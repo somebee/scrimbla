@@ -219,8 +219,8 @@ IM.KeyBindings = [
 			# FIXME need to work with new caret
 			# also - track move-event
 			sel.move(1).erase
-
-		sel.insert(' ')
+			sel.insert(' ')
+			return yes
 
 	combo ['tab'] do |sel|
 		sel.insert('\t')

@@ -19,13 +19,13 @@ export class Hint
 	prop view
 	prop region
 	prop active
+	prop data
 
 	def initialize opts, view
 		@view = view
 		@data = opts
-		@active = no
-		@region = opts:loc ? Region.normalize(opts:loc,view) : null
-		# try to find the node immediately
+		active = no
+		@region =  Region.normalize(opts:loc or opts:region,view)
 		@node = opts:node # || node
 		self
 
@@ -67,30 +67,28 @@ export class Hint
 
 
 	def activate
-		unless @active
-			# node?.setAttribute('hint',ref)
-			@active = yes
-			# node?.setHint(self)
+		unless active
+			active = yes
+			view.listeners.emit('ShowHint',self)
 		self
 
 	def deactivate
-		console.log 'deactivate hint!!'
-		active = no
+		if active
+			active = no
+			view.listeners.emit('HideHint',self)
 		self
-		# cleanup
-		# remove
 
 	def prune
+		# why not remove immediately?
 		view.hints.prune(self)
 
 	# should make this hint ready to be removed
 	def cleanup
-		if @node
-			@node.setHint(null) if @node.hint == self
 		self
 
 	def remove
 		view.hints.rem(self)
+		deactivate
 		return self
 
 	def changed
@@ -104,14 +102,23 @@ export class Hint
 
 		if region.intersects(reg)
 			# deactivate
+			region.adjust(reg,ins)
 			prune
-			# @deactivate = yes
-		# really?
-		region.adjust(reg,ins)
+		else
+			region.adjust(reg,ins)
 		self
 
 	def popup
 		<hintview@popup[self]>
+
+	def toJSON
+		{
+			type: type
+			group: group
+			ref: ref
+			region: region.toArray
+			label: label
+		}
 
 
 # TODO use List
@@ -150,6 +157,7 @@ export class Hints
 			return rem get(hint)
 
 		if @array.indexOf(hint) >= 0
+			hint.deactivate
 			hint.cleanup
 			@array.splice(@array.indexOf(hint),1)
 

@@ -31,10 +31,15 @@ def api.compile code, o = {}
 
 def api.bundle bundle, o = {}
 	var output = {FILES: {}}
+
 	for own name,file of bundle.FILES
 		if name.match(/\.imba$/)
 			var jsname = name.replace(/\.imba$/,'.js')
-			var out = output.FILES[jsname] = {}
+			var out = output.FILES[jsname] = {
+				id: file:id
+				name: jsname
+			}
+
 			try
 
 				o:filename = name
@@ -42,6 +47,7 @@ def api.bundle bundle, o = {}
 				o:targetPath = jsname
 
 				var res = compiler.compile(file:body,o)
+				out:sourcemap = res:sourcemap
 				out:body = res.toString
 			catch e
 				out:error = normalizeError(e,o)

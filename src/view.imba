@@ -319,9 +319,12 @@ tag imview
 			return cmd:command.apply(target or self,params)
 
 	def onkeydown e
-
+		console.log 'onkeydown',e,localCaret.active
 		var combo = shortcuts.keysForEvent(e.event)
 		e.data = view: self, combo: combo
+
+		# keyup should not be captured here either
+		return if !editable
 
 		if e.keycombo == 'esc'
 			# pass through
@@ -427,6 +430,9 @@ tag imview
 		@caret
 
 	def onkeypress e
+		if !editable
+			return
+
 		if @awaitCombo
 			@awaitCombo = no
 			return e.halt
@@ -449,6 +455,10 @@ tag imview
 		self
 
 	def ontextinput e
+		if !editable
+			e.halt.cancel
+			return
+
 		e.@text = e.event:data
 		console.log 'textinput',e.event:data
 		e.halt.cancel
@@ -493,11 +503,6 @@ tag imview
 			
 		catch e
 			log 'error from ontype'
-
-	def onbackspace e
-		e.cancel.halt
-		localCaret.erase
-		return
 
 	def onbeforecopy e
 		log('onbeforecopy',e,localCaret.text)
