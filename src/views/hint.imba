@@ -41,6 +41,8 @@ tag hintview
 		let reg = region
 		return self unless reg
 
+		console.log 'hintview render',object.active
+
 		var a = @a = @start = buffer.locToCell(reg.start)
 		var b = @b = @end = buffer.locToCell(reg.end)
 

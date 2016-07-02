@@ -52,14 +52,6 @@ tag imview
 	def highlighter
 		Highlighter
 
-	#	def lineHeight
-	#		@origo.dom:offsetHeight
-	#		# @dims.dom:offsetHeight
-	#
-	#	def charWidth
-	#		@origo.dom:offsetWidth
-	#		# @dims.ch
-
 	def isReadOnly
 		history.mode == 'play'
 
@@ -245,26 +237,6 @@ tag imview
 	def refocus
 		dom.focus unless document:activeElement == dom
 		self
-
-	# def onfocusin e
-	# 	VIEW = self
-	# 	flag('focus')
-	# 	@caret.activate
-	# 	console.log 'activating caret'
-	# 	# this is _only_ to get working copy/paste and textinput event
-	# 	# all native behaviour is cancelled / overridden
-	# 	dom:contentEditable = yes
-	# 	self
-
-	# def onfocusout e
-	# 	unflag('focus')
-	# 	dom:contentEditable = no
-	# 	console.log 'onfocusout'
-	# 
-	# 	if @caret.active
-	# 		@caret.deactivate
-	# 		trigger('scrimbla:caret:deactivate',{caret: @caret})
-	# 	self
 
 	def didfocus e
 		unless hasFlag('focus')
@@ -858,21 +830,22 @@ tag imview
 				for v in scope:vars
 					vars.push(v)
 
+
 			var warnings = meta:warnings or []
-			var oldWarnings = hints.filter do |hint| hint.group == 'analysis'
+			# dont show errors when not editing
+			if editable
+				var oldWarnings = hints.filter do |hint| hint.group == 'analysis'
 
-			if oldWarnings
-				# could intelligently keep them instead
-				hints.rem(oldWarnings)
+				if oldWarnings
+					# could intelligently keep them instead
+					hints.rem(oldWarnings)
 
-			for warn in warnings
-				warn:type ||= 'error'
-				warn:group = 'analysis'
-				# dont show errors
-				hints.add(warn)
-				# .activate
-
-			WARNS = warnings
+				for warn in warnings
+					warn:type ||= 'error'
+					warn:group = 'analysis'
+					# dont show errors
+					hints.add(warn)
+					# .activate
 
 			trigger(:annotate,meta)
 

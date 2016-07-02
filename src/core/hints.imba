@@ -70,12 +70,14 @@ export class Hint
 		unless active
 			active = yes
 			view.listeners.emit('ShowHint',self)
+			popup
 		self
 
 	def deactivate
 		if active
 			active = no
 			view.listeners.emit('HideHint',self)
+			popup # trigger immediate rendering
 		self
 
 	def prune
