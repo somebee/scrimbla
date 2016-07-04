@@ -13,20 +13,21 @@ var rules = [
 
 export class Hint
 
-	def self.build o, view
-		self.new(o, view)
+	def self.build o, view, ref
+		self.new(o, view, ref)
 
 	prop view
 	prop region
 	prop active
 	prop data
 
-	def initialize opts, view
+	def initialize opts, view, ref
+		@ref = ref
 		@view = view
 		@data = opts
 		active = no
 		@region =  Region.normalize(opts:loc or opts:region,view)
-		@node = opts:node # || node
+		@node = opts:node
 		self
 
 	def getAttribute key
@@ -43,7 +44,7 @@ export class Hint
 		@data:group
 
 	def ref
-		@data:ref
+		@ref
 
 	def node
 		@node ||= @region and view.nodeAtRegion(@region)
@@ -70,14 +71,12 @@ export class Hint
 		unless active
 			active = yes
 			view.listeners.emit('ShowHint',self)
-			popup
 		self
 
 	def deactivate
 		if active
 			active = no
 			view.listeners.emit('HideHint',self)
-			popup # trigger immediate rendering
 		self
 
 	def prune
@@ -161,6 +160,7 @@ export class Hints
 		if @array.indexOf(hint) >= 0
 			hint.deactivate
 			hint.cleanup
+			@map[hint.ref] = null # remove reference to the hint
 			@array.splice(@array.indexOf(hint),1)
 
 		return hint
@@ -193,9 +193,9 @@ export class Hints
 	def map cb
 		@array.map(cb)
 
-	def add o
-		var ref = o:ref = "hint{nr++}"
-		o = Hint.build(o,@view) unless o isa Hint
+	def add o, ref = null
+		ref ||= "h{nr++}"
+		o = Hint.build(o,@view,ref) unless o isa Hint
 		@map[ref] = o
 		@array.push(o)
 		return o
