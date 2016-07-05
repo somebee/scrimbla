@@ -135,9 +135,7 @@ tag imview
 		@dirty = yes
 		@buffer.refresh
 
-		view.hints.rem do |hint|
-			hint.group == 'runtime'
-
+		hints.rem do |hint| hint.deactivateOnEdit
 		hints.cleanup
 
 		delay('didchange',50) do
@@ -834,18 +832,28 @@ tag imview
 			var warnings = meta:warnings or []
 			# dont show errors when not editing
 			if editable
-				var oldWarnings = hints.filter do |hint| hint.group == 'analysis'
+				var oldWarnings = hints.filter do |hint|
+					hint.group == 'analysis'
 
-				if oldWarnings
-					# could intelligently keep them instead
-					hints.rem(oldWarnings)
-
-				for warn in warnings
+				# if the hints already exists - dont add them again
+				warnings.map do |warn|
 					warn:type ||= 'error'
 					warn:group = 'analysis'
-					# dont show errors
+
+					let reg = warn:loc or warn:region
+					# console.log 'region for warning',reg,warn
+					for prev,i in oldWarnings
+						# console.log 'prev warning',prev.region,reg
+						if prev.region.equals(reg)
+							# console.log 'found existing warning for this?',prev
+							prev.update(warn)
+							oldWarnings[i] = null
+							return
+
 					hints.add(warn)
-					# .activate
+
+				if oldWarnings
+					hints.rem oldWarnings.filter(|hint| hint)
 
 			trigger(:annotate,meta)
 

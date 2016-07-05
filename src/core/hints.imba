@@ -30,6 +30,12 @@ export class Hint
 		@node = opts:node
 		self
 
+	def update data
+		@data = data
+		@label = null
+		console.log 'updating hint'
+		self
+
 	def getAttribute key
 		@data[key]
 
@@ -79,6 +85,12 @@ export class Hint
 			view.listeners.emit('HideHint',self)
 		self
 
+	def deactivateOnIntersect
+		!data:ref
+
+	def deactivateOnEdit
+		group == 'runtime' && !data:ref
+
 	def prune
 		# why not remove immediately?
 		view.hints.prune(self)
@@ -100,11 +112,11 @@ export class Hint
 
 	def adjust reg, ins = yes
 		return self unless region
-
+		console.log 'adjust hint',reg,data
 		if region.intersects(reg)
 			# deactivate
 			region.adjust(reg,ins)
-			prune
+			prune if deactivateOnIntersect
 		else
 			region.adjust(reg,ins)
 		self

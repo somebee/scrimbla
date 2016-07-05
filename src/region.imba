@@ -55,6 +55,9 @@ export class Region
 		if add
 			if rel.start <= start
 				move(rel.size)
+			elif rel.start == end
+				# should extend
+				expand(0,rel.size)
 			# is inside
 			elif inside
 				expand(0,rel.size)
@@ -89,6 +92,7 @@ export class Region
 		self
 
 	def equals region
+		region = Region.normalize(region,@view)
 		start == region.start && end == region.end
 
 	def same region
