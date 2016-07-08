@@ -228,19 +228,17 @@ IM.KeyBindings = [
 	combo ['super+up'] do |sel|
 		# FIXME work with new caret
 		sel.collapsed = yes
-		sel.set([0,0])
-		sel.modified
-		# should be included in modified
+		sel.set([0,0],yes)
+
+	combo ['super+shift+up'] do |sel|
+		sel.set([sel.region.a,0],yes)
 
 	combo ['super+down'] do |sel|
-		# FIXME work with new caret
-		console.log 'super+down',sel
 		sel.collapsed = yes
-		sel.moveTo(sel.buffer.size)
-		sel.modified
+		sel.set([sel.buffer.size,sel.buffer.size],yes)
 
-		# sel.collapse.head.set(100000,0).normalize
-		# sel.dirty
+	combo ['super+shift+down'] do |sel|
+		sel.set([sel.region.a,sel.buffer.size],yes)
 
 	combo ['super+u'] do |sel,o|
 		console.log sel.target, "found ut!!!"

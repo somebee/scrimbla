@@ -541,9 +541,9 @@ tag imview
 
 		return unless touch.button == 0
 
-		if touch.@touch
-			# is it not redirected?
-			return touch.redirect({})
+		# if touch.@touch
+		#	# is it not redirected?
+		#	return touch.redirect({})
 
 		var e = touch.event
 		e.preventDefault

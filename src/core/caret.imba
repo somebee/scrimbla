@@ -25,7 +25,6 @@ export class Caret
 		self
 
 	def adjust rel, ins = yes
-		# console.log 'adjust',rel.a,rel.b,region.a,region.b,ins,rel.size,region.size
 		region.adjust(rel,ins)
 		self
 
@@ -34,12 +33,10 @@ export class Caret
 		self.region = Region.normalize(region,view)
 		collapsed = no if self.region.size > 0
 		unblink(yes)
-		modified if broadcast
 		self
 
 	def regionDidSet new, old
 		if !old or (new and !new.equals(old))
-			# console.log 'region did change'
 			var mode = view.@batch
 
 			var opts = {
@@ -49,14 +46,6 @@ export class Caret
 			}
 
 			view.listeners.emit('SelectionModified',opts,self)
-
-			if mode:keydown or mode:touch or mode:input
-				view.trigger('scrimbla:caret:move',
-					caret: self,
-					value: new.toJSON,
-					prev: old and old.toJSON,
-					rel: old and new.relativeTo(old).toJSON
-				)
 		self
 
 	def destroy
@@ -73,14 +62,10 @@ export class Caret
 		self
 
 	def modified
-		view.listeners.emit('SelectionModified',region,self)
 		self
 
 	def broadcast
 		self
-		# if view.@batch:keydown or view.@batch:touch or view.@batch:input
-		# 	console.log 'caret broadcast keydown'
-		# 	view.trigger('scrimbla:caret:move',caret: self, value: [region.a,region.b])
 
 	# what does this do?
 	def normalize
@@ -117,8 +102,6 @@ export class Caret
 		new.b = to
 		new.collapseToHead if @collapsed # confusing
 		region = new
-		# modified
-		# broadcast
 		unblink(yes)
 		return self
 
@@ -142,23 +125,26 @@ export class Caret
 
 	def moveUp
 		# first remember the current column
-		var curr = buffer.locToCell(region.b)
+		var from = region.start
+		var curr = buffer.locToCell(from)
 		@realCol ||= curr[1]
 		var cell = [curr[0] - 1,@realCol]
 		var loc = buffer.cellToLoc(cell)
-		console.log 'move down from',curr,cell,loc,@realCol
+		# console.log 'move down from',curr,cell,loc,@realCol
 		moveTo(loc) # simply move by that amount
 		self
 
 	def moveDown
 		# var cell = region.cell
-		var curr = buffer.locToCell(region.b)
+		var from = region.end
+		var curr = buffer.locToCell(from)
 		@realCol ||= curr[1]
 		var cell = [curr[0] + 1,@realCol]
-		console.log 'move down from',curr,cell
+		# console.log 'move down from',curr,cell
 		var loc = buffer.cellToLoc(cell)
 		moveTo(loc) # simply move by that amount
 		# first remember the current column
+
 		self
 
 	def collapseToStart
