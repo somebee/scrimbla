@@ -112,7 +112,7 @@ export class Hint
 
 	def adjust reg, ins = yes
 		return self unless region
-		console.log 'adjust hint',reg,data
+		# console.log 'adjust hint',reg,data
 		if region.intersects(reg)
 			# deactivate
 			region.adjust(reg,ins)

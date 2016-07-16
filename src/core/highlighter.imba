@@ -13,7 +13,7 @@ var KEYWORDS = [
 	'class', 'extends', 'super', 'return',
 	'undefined', 'then', 'unless', 'until', 'loop', 'of', 'by',
 	'when','def','tag','do','elif','begin','var','let','self','await','import',
-	'and','or','is','isnt','not','isa','case','nil'
+	'and','or','is','isnt','not','isa','case','nil','export','default','require'
 ]
 
 var classes = {
@@ -74,6 +74,7 @@ var classes = {
 	'herecomment': '_herecomment'
 	'relation': 'keyword relation'
 	'export': 'keyword export'
+	'default': 'keyword default'
 	'global': 'keyword global'
 	'extern': 'keyword global'
 	'extend': 'keyword extend'
@@ -422,7 +423,6 @@ export class Highlighter
 		CODE_REPARSE = code
 
 		if util.isWhitespace(code) and !tokens
-			console.log 'using whitespaceToTokens'
 			tokens = self.whitespaceToTokens(code)
 		# logger.log nodes.slice
 		# big hack - adding a space at the end to close up selectors
@@ -433,7 +433,7 @@ export class Highlighter
 				tokens = normalizeTokens(code,tokens)
 				logger.log tokens.slice
 			catch e
-				console.log 'could not reparse tokens',code,e
+				# console.log 'could not reparse tokens',code,e
 				tokens = null
 
 		logger.log nodes.slice
@@ -692,10 +692,6 @@ export class Highlighter
 
 			var node = NODETYPE
 			var content = str.substr(loc,len)
-			# temporary workaround until we redefine require as an identifier
-			if typ == 'const' and content == 'require'
-				typ = 'require'
-
 
 			var cls = classes[typ] or typ
 

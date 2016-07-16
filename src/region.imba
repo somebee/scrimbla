@@ -70,7 +70,6 @@ export class Region
 				a = b = rel.start
 
 			elif rel.end <= start
-				console.log 'relative end is before own start'
 				move(-rel.size)
 			elif inside
 				expand(0,-rel.size)

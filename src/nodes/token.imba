@@ -11,7 +11,8 @@ var keywords = [
 	'class', 'extends', 'super', 'return',
 	'undefined', 'then', 'unless', 'until', 'loop', 'of', 'by',
 	'when','def','tag','do','elif','begin','var','let','self','await','import',
-	'and','or','is','isnt','not','yes','no','isa','case','nil', 'extend', 'export', 'own'
+	'and','or','is','isnt','not','yes','no','isa','case','nil', 'extend', 'export',
+	'own','default','as','from','require'
 ]
 
 # this is really the general token
