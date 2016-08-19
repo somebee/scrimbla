@@ -1,3 +1,5 @@
+require 'imba/src/imba/imba'
+
 extern postMessage
 
 var compiler = require 'imba/src/compiler/compiler'
