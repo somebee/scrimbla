@@ -9,6 +9,7 @@ var labels =
 var rules = [
 	[/Uncaught Error: tag (\w+) is not defined/,"tag <b>$1</b> does not exist"]
 	[/tag\$\.\$([\w\_]+) is not a function/,"tag <b>$1</b> is not defined"]
+	[/\_T\.(\w+)\(\.\.\.\)\.set(\w+) is not a function/,(do |m,a,b| "setter {b.toLowerCase} not found")]
 ]
 
 export class Hint
