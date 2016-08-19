@@ -19,6 +19,7 @@ import Hints,Hint from './core/hints'
 import Highlighter from './core/highlighter'
 import ListenerManager, Listener from './core/listener'
 import Command,TextCommand from './core/command'
+import Lang from './lang/base/lang'
 
 
 GCOMMAND = Command
@@ -41,6 +42,8 @@ tag imview
 	prop focusNode watch: yes
 	prop caret
 	prop carets
+
+	prop lang
 
 	prop frames
 	prop readonly
@@ -93,7 +96,7 @@ tag imview
 			didblur(e)
 			
 
-		worker ||= IM.worker # imba specific
+		worker ||= IM.worker # imba specific - should move into language
 
 		Imba.emit(self,'built')
 		self
@@ -150,6 +153,9 @@ tag imview
 		delay('annotate',200) do
 			annotate
 		self
+
+	def parser
+		@parser ||= Lang.parserForView(self) # (lang and lang.new(self))
 
 	def dirty
 		self
@@ -210,6 +216,8 @@ tag imview
 			Imba.once(self,'built') do load(code,o)
 			return self
 
+		console.log 'loading code / view',o
+		self.lang = o:lang or 'imba'
 
 		filename = o:filename
 
@@ -242,8 +250,6 @@ tag imview
 			flag('focus')
 			@caret.activate
 			console.log 'activating caret'
-			# this is _only_ to get working copy/paste and textinput event
-			# all native behaviour is cancelled / overridden
 			dom:contentEditable = yes
 		self
 
@@ -271,14 +277,13 @@ tag imview
 			self
 
 	def setDummySelection
-		# return self
-		# @seltext.dom:contentEditable = yes
 		var selection = window.getSelection
 		var range = document.createRange
 		range.selectNodeContents(@seltext.dom)
 		selection.removeAllRanges
 		selection.addRange(range)
 		self
+
 
 	def tryCommand cmd, target, params = []
 		if cmd:context
@@ -287,6 +292,7 @@ tag imview
 
 		if cmd:command isa Function
 			return cmd:command.apply(target or self,params)
+
 
 	def onkeydown e
 		console.log 'onkeydown',e,localCaret.active
@@ -305,6 +311,7 @@ tag imview
 
 		self
 
+
 	def trykeydown e
 		VIEW = self # hack
 		
@@ -316,8 +323,6 @@ tag imview
 		var shift = (/\bshift\b/).test(combo)
 		var alt = (/\balt\b/).test(combo)
 		var sup = (/\bsuper\b/).test(combo)
-
-		# log 'imview keydown',combo
 
 		if action
 			e.halt
@@ -380,7 +385,6 @@ tag imview
 			setDummySelection
 
 		# if safari we do need to make the whole element contentEditable
-
 		if combo.match(/^super\+(c|v|x)$/)
 			console.log 'matching combo for copy paste'
 			e.halt
@@ -391,9 +395,7 @@ tag imview
 			e.halt.cancel
 			console.log 'caret.insert directly?!'
 			localCaret.insert(ins)
-			return self
 
-		# trigger('scrimbla:keycombo',combo)
 		self
 
 	def localCaret
@@ -416,12 +418,13 @@ tag imview
 			return
 
 		var text = String.fromCharCode(charCode)
-		# console.log 'keypress',text
+
 		e.@text = text
 		e.cancel
+
 		batch(trigger: yes, input: yes) do
 			ontype(e)
-		# listeners.emit('Keypress',[])
+
 		self
 
 	def ontextinput e
@@ -439,12 +442,9 @@ tag imview
 
 	def onkeyup e
 		e.halt
-		self
 
 	def oninput e
-		console.log 'oninput',e
 		e.halt
-		self
 
 	def ontype e
 		try 
@@ -591,13 +591,6 @@ tag imview
 		self
 
 	def ontouchend touch
-		return unless touch.button == 0
-		var [r,c] = rcForTouch(touch)
-
-		# batch(touch: yes) do
-		# 	# localCaret.moveTo(@buffer.cellToLoc([r,c]))
-		# 	# if localCaret.region.size == 0
-		# 	# 	localCaret.collapsed = yes
 		self
 
 	def erase reg, edit
@@ -667,6 +660,7 @@ tag imview
 		listeners.emit('Modified', ['Insert',point,str])
 
 		if @batch:trigger
+			# TODO remove
 			trigger('scrimbla:insert',[point,str])
 
 		# log 'insert in view'
@@ -676,9 +670,6 @@ tag imview
 		var lft = spans:lft, rgt = spans:rgt
 		var node
 		var reg
-
-		# log spans,mid,lft,rgt
-		# log 'before and after',lft,rgt,str
 
 		if mid
 			log 'insert mid',mid:node
@@ -730,6 +721,7 @@ tag imview
 	def inserted loc, str
 		log 'inserted',loc,str
 		var reg = Region.new(loc,loc + str:length,null,self)
+
 		for hint in hints
 			hint.adjust(reg,yes)
 
@@ -759,12 +751,10 @@ tag imview
 		self
 
 	def repair
-		# console.log 'repair'
 		@dirty = no
 		var els = dom.getElementsByClassName('dirty')
 
 		if els:length
-			# logger.log "{els:length} dirty nodes to repair"
 
 			var muts = for el in els
 				tag(el)
@@ -817,89 +807,7 @@ tag imview
 		self
 
 	def annotate
-		var state = root.codeState
-		var code = state:code
-		console.log 'annotating'
-
-		var apply = do |meta|
-			ANNO = @annotations = meta
-			var vars = []
-			for scope in meta:scopes
-				for v in scope:vars
-					vars.push(v)
-
-
-			var warnings = meta:warnings or []
-			# dont show errors when not editing
-			if editable
-				var oldWarnings = hints.filter do |hint|
-					hint.group == 'analysis'
-
-				# if the hints already exists - dont add them again
-				warnings.map do |warn|
-					warn:type ||= 'error'
-					warn:group = 'analysis'
-
-					let reg = warn:loc or warn:region
-					# console.log 'region for warning',reg,warn
-					for prev,i in oldWarnings
-						# console.log 'prev warning',prev.region,reg
-						if prev.region.equals(reg)
-							# console.log 'found existing warning for this?',prev
-							prev.update(warn)
-							oldWarnings[i] = null
-							return
-
-					hints.add(warn)
-
-				if oldWarnings
-					hints.rem oldWarnings.filter(|hint| hint)
-
-			trigger(:annotate,meta)
-
-			return self if warnings:length
-
-			var nodes = IM.textNodes(root.dom,yes)
-			# what about removing old warnings?
-
-			var map = {}
-			for node,i in nodes
-				map[node.@loc] = node
-
-			# get textNodes with mapping(!)
-			for variable,i in vars
-				for ref,k in variable:refs
-					var a = ref:loc[0]
-					var b = ref:loc[1]
-					var eref = "v{i}"
-
-					if map[a]
-						let dom = map[a]:parentNode
-						let oldRef = dom.getAttribute('eref')
-						let el = tag(dom)
-						if el and el:setEref
-							el.eref = eref
-							el.setFlag('vartype',"{variable:type}ref")
-						# tag(dom).eref = eref
-			return
-
-		try
-			console.time('analyze')
-			worker.analyze(code, bare: yes) do |res|
-				console.log 'result from worker analyze'
-				console.timeEnd('analyze')
-
-				if res:meta
-					console.time('annotate')
-					apply(res:meta)
-					console.timeEnd('annotate')
-				else
-					yes
-				
-		catch e
-			log 'error from annotate',e
-
-		return self
+		parser and parser.annotate(self)
 
 	def oncommand e, c
 		if self[c:command] isa Function
