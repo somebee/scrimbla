@@ -18,7 +18,7 @@ IM.EMPTY_LINE = 9
 IM.IMBA_WORKER_PATH = "/js/scrimbla.worker.js"
 IM.LANGUAGES = {}
 
-if typeof SCRIMBLA_IMBA_WORKER_PATH != undefined
+if typeof SCRIMBLA_IMBA_WORKER_PATH !== 'undefined'
 	IM.IMBA_WORKER_PATH	= SCRIMBLA_IMBA_WORKER_PATH
 
 IM.FS = require './core/fs'
