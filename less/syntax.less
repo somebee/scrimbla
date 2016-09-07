@@ -218,19 +218,40 @@
 			border-top: 1px solid fade(white,5%);
 		}
 	}
+
+	.caret {
+		.part {
+			background-color: @selbg;
+		}
+		.loc {
+			.mark {
+				@size: 3px;
+				width: (@size * 2 + 1);
+				height: 100%;
+				border: @size solid transparent;
+				border-top: @size solid @caret-color;
+				background: transparent !important;
+				box-sizing: border-box;
+				margin-left: -(@size + 1);
+				position: absolute;
+			}
+
+			.vbar {
+				position: absolute;
+				top: 5px;
+				bottom: 1px;
+				background: @caret-color;
+				width: 1px;
+				left: -1px;
+			}
+		}
+	}
 }
 
 .dark-syntax () {
 	.dark-colors;
 	.base-syntax;
 
-	// ._imtagnode > ._imopen, ._imtagnode > ._imclose {
-	// 	color: #987A32;	
-	// }
-	.tagnode {
-		// background: rgba(217, 187, 114, 0.1);
-		// border-radius: 30px;
-	}
 	._imtagnode:hover {
 		& > ._imopen, & > ._imclose {
 			color: @tag;
