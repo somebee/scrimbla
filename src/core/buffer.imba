@@ -18,6 +18,8 @@ export class Buffer
 		@buffer = buffer
 		@cache = {}
 		@lines = null
+		# should be updated through view instead?
+		view.parser.onmodified(view)
 		self
 
 	def raw
@@ -141,7 +143,7 @@ export class Buffer
 		if mode == IM.WORD_START
 			loc -= 1
 			while chr = @buffer[loc - 1]
-				if chr in [' ','\t','\n','.','"',"'",'[','<','>']
+				if chr in [' ','\t','\n','.','"',"'",'[','<','>','(','{',',']
 					return loc
 				loc -= 1
 			return loc
@@ -149,7 +151,7 @@ export class Buffer
 		elif mode == IM.WORD_END
 			while true
 				chr = @buffer[loc + 1]
-				if !chr or chr in [' ','\t','\n','.','"',"'"]
+				if !chr or chr in [' ','\t','\n','.','"',"'",'>',']',')','}',',',':']
 					return loc + 1
 				loc += 1
 			return loc

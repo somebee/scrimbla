@@ -288,3 +288,17 @@ export def patchString orig, str, mode
 				text.substr(0,region.start) + str + text.slice(region.end)
 
 
+export def boundsForBuffer buffer
+	# find the longest line 
+	var str = buffer.toString
+	var horizontal = 0
+	var vertical = 0
+	# can be optimized by not splitting lines etc
+	var lines = str.split('\n')
+	for line,i in lines
+		let len = colsForLine(line)
+		if len > horizontal
+			horizontal = len
+	return [horizontal,lines.len]
+
+

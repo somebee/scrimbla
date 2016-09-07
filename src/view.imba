@@ -89,10 +89,16 @@ tag imview
 		dom.addEventListener('mouseover') do |e| Imba.Events.delegate(e)
 		dom.addEventListener('mouseout') do |e| Imba.Events.delegate(e)
 
+		dom.addEventListener('mousedown') do |e|
+			if e:button != 0
+				e.preventDefault
+
 		dom.addEventListener('focus') do |e|
+			# console.log 'scrimba view focus'
 			didfocus(e)
 
 		dom.addEventListener('blur') do |e|
+			# console.log 'scrimba view blur'
 			didblur(e)
 			
 
@@ -216,7 +222,7 @@ tag imview
 			Imba.once(self,'built') do load(code,o)
 			return self
 
-		console.log 'loading code / view',o
+		console.log 'loading code / view',o,o:lang
 		self.lang = o:lang or 'imba'
 
 		filename = o:filename
@@ -225,16 +231,20 @@ tag imview
 			root.dom:innerHTML = o:html
 			@buffer.refresh
 			history.onload(self.code)
+			console.log 'loaded html',o:html
 		else
 			# should use our new parser
-			if var parsed = parse(code)
-				if parsed:highlighted
-					root.dom:innerHTML = parsed:highlighted
-				else
-					root.dom:textContent = code
+			if var parsed = parser.rawToHTML(code)
+				console.log 'loaded rawToHTML',parsed
+				root.dom:innerHTML = parsed
+			else
+				console.log 'loaded raw code',code
+				root.dom:textContent = code
+
 			@buffer.refresh
 			history.onload(code)
 			annotate
+
 		self
 
 	def parse code
@@ -537,19 +547,14 @@ tag imview
 		return
 
 	def ontouchstart touch
-		@cellbox = @origo.dom.getBoundingClientRect
-
 		return unless touch.button == 0
 
-		# if touch.@touch
-		#	# is it not redirected?
-		#	return touch.redirect({})
+		@cellbox = @origo.dom.getBoundingClientRect
 
 		var e = touch.event
 		e.preventDefault
 		var shift = e:shiftKey
 		@caret.collapsed = !shift
-		console.log 'touchstart',@caret.collapsed
 
 		if shift
 			touch.@caretStart = caret.region.a
@@ -594,7 +599,9 @@ tag imview
 		self
 
 	def erase reg, edit
-		reg = Region.normalize(reg,self).clone
+		VIEW = self
+
+		reg = Region.normalize(reg,self).clone.clip
 
 		var text = reg.text
 		history.onerase(reg,text,edit)
@@ -645,6 +652,7 @@ tag imview
 	# nodes in the affected area to see if we can alter them without
 	# any rehighlighting.
 	def insert point, str, edit
+		VIEW = self
 		# if this is called without an actual command, how 
 		log 'view.insert',str
 		if point isa Region
@@ -784,7 +792,7 @@ tag imview
 		self
 
 	def reparse
-		log 'reparse'
+		console.debug 'reparse'
 		root.rehighlight(inner: yes)
 		return self
 
@@ -1002,6 +1010,8 @@ tag imview
 
 			matches.pop unless includeEnds
 
+		# what if we are in [10,|,20] with includeEnds = false
+		# should we not return the whole array and offset?
 
 		# normalize the nodes in groups
 		if generalize

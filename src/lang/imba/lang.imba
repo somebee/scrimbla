@@ -1,4 +1,5 @@
 import Lang from '../base/lang'
+import Highlighter from '../../core/highlighter'
 
 export class ImbaLang < Lang
 	register 'imba'
@@ -7,6 +8,12 @@ export class ImbaLang < Lang
 		IM.worker
 
 	prop annotations
+
+	def rawToHTML code
+		Highlighter.highlight(code)
+
+	def reparse chunk
+		Highlighter.reparse(chunk)
 
 	def annotate view
 		# should have created an instance for the view
@@ -38,7 +45,7 @@ export class ImbaLang < Lang
 					# console.log 'region for warning',reg,warn
 					for prev,i in oldWarnings
 						# console.log 'prev warning',prev.region,reg
-						if prev.region.equals(reg)
+						if prev.region and prev.region.equals(reg)
 							# console.log 'found existing warning for this?',prev
 							prev.update(warn)
 							oldWarnings[i] = null

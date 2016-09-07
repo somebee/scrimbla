@@ -1,4 +1,5 @@
 import Lang from '../base/lang'
+import Stylesheet from './stylesheet'
 
 export class CSSLang < Lang
 	register 'css'
@@ -8,3 +9,14 @@ export class CSSLang < Lang
 
 	def analyze view
 		self
+
+	def output
+		@output ||= Stylesheet.new(view,self)
+
+	def onmodified
+		# updates should be async
+		@output?.refresh # updating the stylesheet live
+		self
+
+	def rawToHTML code
+		return "<div class='_imraw'>{code}</div>"

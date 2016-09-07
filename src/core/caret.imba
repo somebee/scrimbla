@@ -109,6 +109,11 @@ export class Caret
 		region.expand(a,b)
 		self
 
+	def expandTo reg
+		var reg = Region.normalize(reg,view)
+		region = reg
+		self
+
 	def alter offset = 1, mode = 0
 		if mode == IM.CHAR
 			move(offset)
@@ -211,7 +216,6 @@ export class Caret
 			view.trigger('scrimbla:readonly',[self,'erase'])
 			return
 
-		console.log 'erase!!'
 		unblink(yes)
 		view.history.mark('action')
 

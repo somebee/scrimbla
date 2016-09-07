@@ -94,6 +94,32 @@ var shiftNums = {
 	"\\": "|"
 }
 
+var codeToCombo = {
+	Digit1: "1"
+	Digit2: "2"
+	Digit3: "3"
+	Digit4: "4"
+	Digit5: "5"
+	Digit6: "6"
+	Digit7: "7"
+	Digit8: "8"
+	Digit9: "9"
+	Digit0: "0"
+	Numpad1: "1"
+	Numpad2: "2"
+	Numpad3: "3"
+	Numpad4: "4"
+	Numpad5: "5"
+	Numpad6: "6"
+	Numpad7: "7"
+	Numpad8: "8"
+	Numpad9: "9"
+	Numpad0: "0"
+	MetaLeft: 'super'
+	MetaRight: 'super'
+	Escape: 'esc'
+}
+
 def trigger key, o
 	if o isa Function
 		o = {command: o}
@@ -129,7 +155,6 @@ IM.KeyBindings = [
 			var region = sel.region.clone.expandToLines.expand(-1,0)
 			var points = region.find('\n').reverse
 			points.map do |pos|
-				console.log 'found newline at pos',pos
 				sel.view.insert(pos + 1,'\t')
 			return yes
 
@@ -146,7 +171,6 @@ IM.KeyBindings = [
 
 	combo ["backspace"]
 		context: do |e|
-			console.log 'deleteLeftRight backspace?!?',e,e.region,e.region.peek(-1,1)
 			return e.region.peek(-1,1) in ['[]','{}','<>','()','""',"''"]
 
 		command: do |sel|
@@ -160,7 +184,6 @@ IM.KeyBindings = [
 			if reg.size == 0
 				if reg.peek(-1,0) in [']',')','}']
 					var start = util.findPairStart(reg.buffer.raw,reg.start - 1)
-					console.log 'the start of the pair is',start
 					if start >= 0
 						o:region = [reg.start,start]
 						return yes
@@ -182,7 +205,6 @@ IM.KeyBindings = [
 			yes # noop
 
 	combo ["backspace"] do |sel| sel.erase
-
 	combo ["shift+backspace"] do |sel| sel.erase
 	combo ["alt+backspace"] do |sel| sel.erase(IM.WORD_START)
 	combo ["super+backspace"] do |sel| sel.erase(IM.LINE_START)
@@ -204,10 +226,8 @@ IM.KeyBindings = [
 		ind += '\t' if util.increaseIndent(sel.buffer.substringBeforeLoc(sel.region.a))
 
 		# should not happen in string
-		# 
 		if sel.region.peek(-1,1) in ['[]','{}','()']
-			sel.insert('\n\t' + ind)
-			sel.view.insert(sel.region.b,'\n' + ind)
+			sel.insert('\n\t' + ind + '\n' + ind).move( -('\n' + ind):length )
 		else
 			sel.insert('\n' + ind)
 
@@ -230,6 +250,17 @@ IM.KeyBindings = [
 		sel.collapsed = yes
 		sel.set([0,0],yes)
 
+	combo ['ctrl+shift+up'] do |sel|
+		sel.expandTo sel.region.clone.expandToEntity
+
+	combo ['ctrl+shift+right'] do |sel|
+		if var node = sel.view.nodeAtRegion(sel.region)
+
+			if node.matches('._imopen')
+				node = node.parent
+
+			sel.region = node.region
+
 	combo ['super+shift+up'] do |sel|
 		sel.set([sel.region.a,0],yes)
 
@@ -247,15 +278,45 @@ IM.KeyBindings = [
 	combo ['alt+super+r'] do window:location.reload
 ]
 
+var mover = do |chr|
+	{
+		context: do |sel| sel.region.peek(0,1) == chr
+		command: do |sel| sel.move(1)
+	}
+
+# var peeker = do |a,b,val,cmd|
+# 	{
+# 		context: do |sel| sel.region.peek(a,b) == val
+# 		command: cmd
+# 	}
+
 IM.Triggers = [
 
 	trigger '|'
 		context: do |sel| sel.region.peek(-1,1) == '||'
-		command: do |sel| sel.move(1) # override to do nothing
+		command: do |sel| sel.move(1)
+
+	trigger ']', mover(']')
+	trigger '}', mover('}')
+	trigger ')', mover(')')
+	trigger '"', mover('"')
+	trigger "'", mover("'")
 
 	trigger '[' do |sel| sel.insert('[$0]')
 	trigger '(' do |sel| sel.insert('($0)')
 	trigger '{' do |sel| sel.insert('{$0}')
+
+	trigger '"'
+		context: do |sel| sel.region.peek(-1,0) != '"'
+		command: do |sel| sel.insert('"$0"')
+
+	trigger "'"
+		context: do |sel| sel.region.peek(-1,0) != "'"
+		command: do |sel| sel.insert("'$0'")
+
+	# trigger '"' do |sel| sel.insert('"$0"')
+	# trigger "'" do |sel| sel.insert("'$0'")
+
 	trigger '|'
 		context: do |sel| sel.peekbehind(/(\bdo\s*|\()$/)
 		command: do |sel| sel.insert('|$0|')
@@ -263,35 +324,6 @@ IM.Triggers = [
 	trigger '<'
 		context: do |sel| !sel.peekbehind(/(\b(tag|if|class) |\d\s*$)/)
 		command: do |sel| sel.insert('<$0>')
-
-	trigger '"'
-		context: do |sel,o| 
-			if sel.region.peek(-1,0) == '\\' and o:node = sel.region.scope(%imstr)
-				true
-		command: do |sel| sel.insert('"')
-
-	trigger "'"
-		context: do |sel,o| sel.region.peek(-1,1) == "''"
-		command: do |sel| sel.move(1)
-
-	trigger "'"
-		context: do |sel,o| o:node = sel.region.scope(%imstr)
-		command: do |sel| sel.insert("\\'")
-
-	trigger '"' do |sel| sel.insert('"$0"')
-	trigger "'" do |sel| sel.insert("'$0'")
-	
-	trigger ']'
-		context: do |sel| sel.region.peek(0,1) == ']'
-		command: do |sel| sel.move(1) # override to do nothing
-
-	trigger '}'
-		context: do |sel| sel.region.peek(0,1) == '}'
-		command: do |sel| sel.move(1) # override to do nothing
-
-	trigger ')'
-		context: do |sel| sel.region.peek(0,1) == ')'
-		command: do |sel| sel.move(1) # override to do nothing
 ]
 
 global class ShortcutManager
@@ -301,16 +333,21 @@ global class ShortcutManager
 
 	def self.keysForEvent e
 		var combo = []
-		var special = specialKeys[e:which]
+		var special = codeToCombo[e:code] or specialKeys[e:which]
 		var chr = special or String.fromCharCode(e:which)
-		
+
+		# if e:code and 
+		# 	chr 
 		chr = chr.toLowerCase # unless e:shiftKey
 
-		combo.push('ctrl') if e:ctrlKey and special != 'ctrl'
-		combo.push('alt') if e:altKey and special != 'alt'
-		combo.push('super') if e:metaKey && !e:ctrlKey && special !== 'meta'
-		combo.push('shift') if e:shiftKey and special != 'shift'
+		combo.push('ctrl') if e:ctrlKey # and special != 'ctrl'
+		combo.push('alt') if e:altKey # and special != 'alt'
+		combo.push('super') if e:metaKey # && !e:ctrlKey && special !== 'meta'
+		combo.push('shift') if e:shiftKey # and special != 'shift'
 		combo.push(chr) unless combo.indexOf(chr) >= 0
+		
+		# console.debug e:key,e:which,chr,e:code,String.fromCharCode(e:which),combo.join('+'),e:keyCode,e:charCode
+
 		return combo.join('+')
 
 	def initialize view, bindings

@@ -25,7 +25,7 @@ tag iminsert < im
 	def mutated
 		# log 'iminsert mutated'
 		var dirty = dirtyExtent
-		view.highlighter.reparse(dirty)
+		view.parser.reparse(dirty)
 		self
 
 tag imwhitespace < im
@@ -79,7 +79,7 @@ tag imnewline < imwhitespace
 			orphanize
 		else
 			log 'reparse newline'
-			view.highlighter.reparse({nodes: [dom], code: code})
+			view.parser.reparse({nodes: [dom], code: code})
 
 		
 

@@ -293,7 +293,7 @@ tag im < b
 		else
 			log 'mutated -- reparse'
 			view.observer.pause do
-				view.highlighter.reparse(dirtyExtent)
+				view.parser.reparse(dirtyExtent)
 
 
 	def reclassify type
@@ -427,7 +427,7 @@ tag im < b
 		view.observer.pause do 
 			var dirty = dirtyExtent
 			e.handled if e
-			Highlighter.reparse(dirty)
+			view.parser.reparse(dirty)
 
 tag imindex < im
 	type 'index'

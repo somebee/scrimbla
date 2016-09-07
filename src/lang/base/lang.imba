@@ -8,6 +8,10 @@ export class Lang
 		var lang = IM.LANGUAGES[view.lang] or IM.LANGAUGES:imba
 		return view.@parser ||= lang.new(view)
 
+	prop view
+
+	def initialize view
+		@view = view
 
 	def log *pars
 		console.log(*pars)
@@ -17,4 +21,13 @@ export class Lang
 		self
 
 	def analyze view
+		self
+
+	def rawToHTML code
+		return code
+
+	def reparse chunk
+		return chunk
+
+	def onmodified
 		self

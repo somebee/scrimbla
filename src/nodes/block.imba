@@ -258,8 +258,8 @@ tag impair < imblock
 		yes
 
 	def mutated
-		log 'muated imcurly'
-		view.highlighter.reparse(dirtyExtent)
+		# log 'muated imcurly'
+		view.parser.reparse(dirtyExtent)
 		self
 
 tag imcurly < impair
@@ -272,8 +272,9 @@ tag imsquare < impair
 
 	def prettify e
 		log 'prettify!'
-		e.handled
-		var ind = e.region.indent
+		e.handled if e
+		# var ind = e.region.indent
+		var ind = '' # '\t'
 		log 'with indentation',ind,ind:length
 
 		view.observer.pause do 

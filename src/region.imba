@@ -49,6 +49,11 @@ export class Region
 		elif rel isa Number
 			start <= rel and end >= rel
 
+	def clip a = 0,b = buffer.len
+		@a = Math.max(Math.min(b,@a),a)
+		@b = Math.max(Math.min(b,@b),a)
+		return self
+
 	def adjust rel, add = yes
 		var inside = start <= rel.start and end >= rel.end
 
@@ -284,4 +289,23 @@ export class Region
 
 	def toArray
 		[a,b]
+
+	# expands the region to the outer logical entity.
+	# if you are inside a string - it will expand to enclose the string,
+	# then expand to the outer array etc. For now it relies on the
+	# ast to actually represent the logical structure
+	def expandToEntity
+		var nodes = view.nodesInRegion(self)
+		var rel
+
+		if var item = nodes[0]
+			if item:mode == 'partial'
+				rel = item:node.region
+			else
+				rel = item:node.parent.region
+
+		if rel
+			a = rel.start
+			b = rel.end
+		self
 	

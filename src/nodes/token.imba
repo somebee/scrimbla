@@ -213,6 +213,9 @@ tag imnum < imtok
 	def reuse
 		self
 
+	def isAtomic
+		yes
+
 tag imint < imnum
 	type 'int'
 
@@ -260,25 +263,25 @@ tag imstr < imtok
 		elif code[0] == "'"
 			(/^\'([^'\{]*)\'$/).test(code)
 
-	trigger '"' do |token,o|
-		if o:mode == 'all'
-			token.quote = '"'
-			return true
-		elif token.quote == '"'
-			this.insert('\\"')
-			return true
-		else
-			this.insert('"')
+	# trigger '"' do |token,o|
+	# 	if o:mode == 'all'
+	# 		token.quote = '"'
+	# 		return true
+	# 	elif token.quote == '"'
+	# 		this.insert('\\"')
+	# 		return true
+	# 	else
+	# 		this.insert('"')
 		
 
-	trigger "'" do |token,o|
-		if o:mode == 'all'
-			token.quote = "'"
-		elif token.quote == "'"
-			this.insert("\\'")
-			return true
-		else
-			this.insert("'")
+	# trigger "'" do |token,o|
+	# 	if o:mode == 'all'
+	# 		token.quote = "'"
+	# 	elif token.quote == "'"
+	# 		this.insert("\\'")
+	# 		return true
+	# 	else
+	# 		this.insert("'")
 
 
 
