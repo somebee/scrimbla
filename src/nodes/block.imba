@@ -119,7 +119,7 @@ tag impair < imblock
 	def open do @open or ''
 	def close do @close or ''
 
-	def build
+	def setup
 		gen
 		self
 

@@ -18,7 +18,7 @@ IM.EMPTY_LINE = 9
 IM.IMBA_WORKER_PATH = "/js/scrimbla.worker.js"
 IM.LANGUAGES = {}
 
-if typeof SCRIMBLA_IMBA_WORKER_PATH !== "undefined"
+if typeof SCRIMBLA_IMBA_WORKER_PATH !== 'undefined'
 	IM.IMBA_WORKER_PATH	= SCRIMBLA_IMBA_WORKER_PATH
 
 IM.FS = require './core/fs'
@@ -35,7 +35,6 @@ require './core/history'
 require './core/logger'
 require './core/shortcuts'
 
-require "./views/captor"
 require "./views/caret"
 require "./views/hint"
 require "./view"
@@ -48,12 +47,6 @@ import Listener from "./core/listener"
 
 def IM.worker
 	@worker ||= ImbacWorker.new
-
-def IM.captor
-	unless @captor
-		@captor = <imcaptor>
-		@captor.enable
-	return @captor
 
 export var util = require './core/util'
 # nodes

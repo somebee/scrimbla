@@ -1,9 +1,5 @@
 
 tag imeditor
-
-	def build
-		render
-		self
 		
 	def render
 		<self>

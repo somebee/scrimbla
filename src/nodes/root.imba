@@ -21,14 +21,6 @@ tag imroot < imblock
 		e.handled
 		self
 
-	def build
-		super
-		# dom.addEventListener('')
-		self
-
-	def commit
-		self
-
 	def next= node
 		appendChild(node)
 		return node

@@ -46,6 +46,7 @@ tag imnewline < imwhitespace
 
 	def canPrepend str
 		if str.match(/^[\n\t\ ]+$/)
+			console.log 'newline can prepend'
 			# should not really be able to prepend here
 			# it shold rather insert a new newline in
 			# an iminsert, and that should be able to
@@ -119,11 +120,14 @@ tag imtab < imwhitespace
 	def validate val = code
 		val == '\t'
 
+var COMMENT = /^\#[ \t][^\n]*$/
+
 tag imcomment < im
 
 	type 'comment'
 
 	def validate code
+		console.log 'validatte comment',code
 		COMMENT.test(code)
 
 	def mutated
@@ -151,9 +155,11 @@ tag imcomment < im
 		repair
 
 	def canPrepend text
+		console.log 'canPrepend',text
 		no
 
 	def canAppend text
+		console.log 'canAppend',text
 		yes unless text.match(/[\n]/)
 
 

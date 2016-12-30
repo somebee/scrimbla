@@ -1,9 +1,3 @@
-# disabling logs for now
-# console:log = do true
-extern requestAnimationFrame
-
-var OPEN = ['"',"'",'(','[','{','<']
-var CLOSE = ['"',"'",')',']','}','>']
 
 if Imba.Events
 	Imba.Events.register(['copy','paste','cut','beforecut','beforepaste','beforecopy','keypress'])
@@ -16,13 +10,14 @@ import Carets,Caret,LocalCaret,RemoteCaret from './core/caret'
 
 import Region from './region'
 import Hints,Hint from './core/hints'
-import Highlighter from './core/highlighter'
 import ListenerManager, Listener from './core/listener'
 import Command,TextCommand from './core/command'
 import Lang from './lang/base/lang'
 
+import './lang/index'
 
 GCOMMAND = Command
+
 import './core/util' as util
 
 import CaretView from './views/caret'
@@ -52,16 +47,13 @@ tag imview
 	prop input
 	prop editable default: yes
 
-	def highlighter
-		Highlighter
-
 	def isReadOnly
 		history.mode == 'play'
 
 	def tabSize
 		4
 
-	def build
+	def setup
 		VIEW = self
 		@batch = {}
 
@@ -104,7 +96,7 @@ tag imview
 
 		worker ||= IM.worker # imba specific - should move into language
 
-		Imba.emit(self,'built')
+		Imba.emit(self,'initialized')
 		self
 
 	def onmouseover e
@@ -217,13 +209,13 @@ tag imview
 		root.size
 
 	def load code, o = {}
-		unless @built
-			console.log 'delay loading'
-			Imba.once(self,'built') do load(code,o)
+		unless this.FLAGS & Imba.TAG_SETUP
+			Imba.once(self,'initialized') do load(code,o)
 			return self
 
-		console.log 'loading code / view',o,o:lang
-		self.lang = o:lang or 'imba'
+		# console.log 'loading code / view',o,o:lang
+		var ext = o:filename and (o:filename.match(/\.(\w+)$/) or [])[1]
+		self.lang = o:lang or ext or 'plaintext'
 
 		filename = o:filename
 
@@ -231,14 +223,14 @@ tag imview
 			root.dom:innerHTML = o:html
 			@buffer.refresh
 			history.onload(self.code)
-			console.log 'loaded html',o:html
+			# console.log 'loaded html',o:html
 		else
 			# should use our new parser
 			if var parsed = parser.rawToHTML(code)
-				console.log 'loaded rawToHTML',parsed
+				# console.log 'loaded rawToHTML',parsed
 				root.dom:innerHTML = parsed
 			else
-				console.log 'loaded raw code',code
+				# console.log 'loaded raw code',code
 				root.dom:textContent = code
 
 			@buffer.refresh
@@ -259,7 +251,7 @@ tag imview
 			VIEW = self
 			flag('focus')
 			@caret.activate
-			console.log 'activating caret'
+			# console.log 'activating caret'
 			dom:contentEditable = yes
 		self
 
@@ -305,7 +297,6 @@ tag imview
 
 
 	def onkeydown e
-		console.log 'onkeydown',e,localCaret.active
 		var combo = shortcuts.keysForEvent(e.event)
 		e.data = view: self, combo: combo
 
@@ -396,14 +387,14 @@ tag imview
 
 		# if safari we do need to make the whole element contentEditable
 		if combo.match(/^super\+(c|v|x)$/)
-			console.log 'matching combo for copy paste'
+			# console.log 'matching combo for copy paste'
 			e.halt
 			@awaitCombo = yes
 			return
 
 		if ins != null
 			e.halt.cancel
-			console.log 'caret.insert directly?!'
+			# console.log 'caret.insert directly?!'
 			localCaret.insert(ins)
 
 		self
@@ -424,7 +415,7 @@ tag imview
 		var charCode = e.event:charCode
 
 		if charCode <= 31 or charCode == 127
-			console.log 'invalid charcode'
+			# console.log 'invalid charcode'
 			return
 
 		var text = String.fromCharCode(charCode)
@@ -443,7 +434,7 @@ tag imview
 			return
 
 		e.@text = e.event:data
-		console.log 'textinput',e.event:data
+		# console.log 'textinput',e.event:data
 		e.halt.cancel
 		batch(trigger: yes, input: yes) do
 			ontype(e)
@@ -459,7 +450,7 @@ tag imview
 	def ontype e
 		try 
 			var ins = e.@text
-			# log 'ontype',e,ins
+			log 'ontype',e,ins
 
 			let spans = view.nodesInRegion(localCaret.region,no,yes)
 			let target = spans[0]
@@ -654,7 +645,7 @@ tag imview
 	def insert point, str, edit
 		VIEW = self
 		# if this is called without an actual command, how 
-		log 'view.insert',str
+		log 'view.insert',str,point
 		if point isa Region
 			if point.size > 0
 				logger.warn 'uncollapsed region in insert is not allowed'
@@ -686,8 +677,9 @@ tag imview
 		else
 
 			while rgt
+				log 'try to prepend to',rgt,str
 				if rgt.canPrepend(str)
-					log 'prepend',rgt,str
+					console.log 'prepend',rgt,str
 					rgt.insert('prepend',str,edit)
 					return inserted(point,str)
 

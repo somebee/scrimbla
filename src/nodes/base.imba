@@ -307,7 +307,7 @@ tag im < b
 				return self
 
 			# log 'found class to reclassify as',cls
-			var node = cls.new(dom).setup
+			var node = cls.new(dom).use
 			return node
 		self
 
@@ -320,11 +320,14 @@ tag im < b
 		return cls
 
 	def setup
+		self
+
+	def use
 		@dom:className = baseClasses
 		self
 
 	def reuse
-		setup(*arguments)
+		use(*arguments)
 
 	def isAtomic
 		no

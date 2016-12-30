@@ -5,8 +5,10 @@ export class Lang
 		IM.LANGUAGES[name] = self
 
 	def self.parserForView view
-		var lang = IM.LANGUAGES[view.lang] or IM.LANGAUGES:imba
+		var lang = IM.LANGUAGES[view.lang] or IM.LANGUAGES:plaintext
 		return view.@parser ||= lang.new(view)
+
+	register 'plaintext'
 
 	prop view
 
@@ -24,7 +26,7 @@ export class Lang
 		self
 
 	def rawToHTML code
-		return code
+		return "<div class='_imraw'>{code}</div>"
 
 	def reparse chunk
 		return chunk

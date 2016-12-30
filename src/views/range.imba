@@ -13,7 +13,7 @@ export tag LocView
 		var val = "{new * 100}%"
 		@dom:style:left = val
 
-	def build
+	def setup
 		<self>
 			<.mark>
 			<.vbar>

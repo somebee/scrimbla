@@ -32,7 +32,7 @@ tag imop < im
 	def baseClasses
 		super + ' ' + (names[code] or '')
 
-	def setup token
+	def use token
 		var val = token and token.@value or code
 		dom:className = "_im _imop op {names[val] or ''}"
 		self

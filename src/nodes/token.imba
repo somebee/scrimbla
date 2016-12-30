@@ -122,10 +122,11 @@ tag imidentifier < imtok
 
 	def validate code
 		# regex for identifier
+		log 'validate identifier',code,(/^[a-z](-?[\wA-Za-z_\-\x7f-\uffff\$]+)*$/).test(code)
 		(/^[a-z](-?[\wA-Za-z_\-\x7f-\uffff\$]+)*$/).test(code) and keywords.indexOf(code) == -1
 
-	def setup tok, new, old
-		# console.log 'identifier setup',baseClasses
+	def use tok, new, old
+		console.log 'identifier setup',baseClasses
 		name = tok.@value if tok and tok.@value
 		@dom:className = baseClasses
 		self
@@ -137,6 +138,15 @@ tag imidentifier < imtok
 			clearVarRef
 		super
 
+	def canPrepend text
+		# should we not run validate first?
+		return no if (/[\n\t\+]+/).test(text)
+		return yes
+
+	def canAppend text
+		return no if (/[\n\t ]+/).test(text)
+		return yes
+
 tag imkey < imtok
 	type 'key'
 
@@ -146,7 +156,7 @@ tag imkey < imtok
 		# regex for identifier
 		(/^[a-z](-?[\wA-Za-z_\-\x7f-\uffff\$]+)*$/).test(code) and keywords.indexOf(code) == -1
 
-	def setup tok, new, old
+	def use tok, new, old
 		# console.log 'identifier setup',baseClasses
 		name = tok.@value if tok and tok.@value
 		@dom:className = baseClasses
@@ -188,7 +198,7 @@ tag imkeyword < imtok
 	type 'keyword'
 	alias 'new'
 
-	def setup tok, new, old
+	def use tok, new, old
 		# console.log 'setup imkeyword',tok, new, old
 		var cls = baseClasses
 		cls += ' ' + tok.@value if tok and tok.@value
@@ -240,7 +250,7 @@ tag imstr < imtok
 		# code = quote + code.slice(1,-1) + quote
 		self
 
-	def setup tok, new, old
+	def use tok, new, old
 		# console.log 'setup string',tok, new, old
 		@dom:className = baseClasses
 		code = new

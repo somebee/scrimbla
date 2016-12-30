@@ -223,7 +223,7 @@ export class Highlighter
 			return node.reuse(token, newCode, oldCode)
 
 		if cls
-			var node = cls.new(domnode).setup(token, newCode, oldCode)
+			var node = cls.new(domnode).use(token, newCode, oldCode)
 
 		return node
 
